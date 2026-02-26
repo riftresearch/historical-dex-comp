@@ -1,0 +1,22 @@
+services:
+  frontend:
+    image: oven/bun:1
+    working_dir: /app
+    user: "${UID:-1000}:${GID:-1000}"
+    env_file:
+      - .env
+    environment:
+      DASHBOARD_HOST: ${DASHBOARD_HOST:-0.0.0.0}
+      DASHBOARD_PORT: ${DASHBOARD_PORT:-3000}
+      DASHBOARD_DAYS: ${DASHBOARD_DAYS:-30}
+    volumes:
+      - ./:/app
+    command: >
+      sh -lc '
+        set -eu;
+        bun install --frozen-lockfile;
+        bun run index.ts dashboard --host "$${DASHBOARD_HOST}" --port "$${DASHBOARD_PORT}" --days "$${DASHBOARD_DAYS}";
+      '
+    ports:
+      - "${DASHBOARD_PORT:-3000}:${DASHBOARD_PORT:-3000}"
+    restart: unless-stopped

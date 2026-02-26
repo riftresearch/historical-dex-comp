@@ -1,0 +1,108 @@
+{
+  "generatedAt": "2026-02-25T23:14:23.706Z",
+  "provider": "lifi",
+  "tokenPath": {
+    "sourceChainCanonical": "eip155:1",
+    "sourceTokenSymbol": "WETH",
+    "destinationChainCanonical": "eip155:1",
+    "destinationTokenSymbol": "CBBTC"
+  },
+  "window": {
+    "startAtIso": "2026-01-01T00:00:00.000Z",
+    "endAtIso": "2026-02-25T23:59:59.000Z"
+  },
+  "notionalUsdFilter": {
+    "min": null,
+    "max": null,
+    "minInclusive": false,
+    "maxInclusive": false,
+    "minExclusive": null,
+    "maxExclusive": null,
+    "minInclusiveValue": null,
+    "maxInclusiveValue": null
+  },
+  "signConvention": {
+    "positiveBps": "output USD < input USD (worse for user)",
+    "negativeBps": "output USD > input USD (better for user)"
+  },
+  "totals": {
+    "matchedTrades": 1,
+    "pricedTrades": 1,
+    "skippedInvalidTimestamp": 0,
+    "skippedMissingAmount": 0,
+    "skippedNonPositiveAmount": 0,
+    "skippedMissingPrice": 0,
+    "skippedOutsideNotionalBand": 0,
+    "pricedMatchRatePct": 100
+  },
+  "outcomeSummary": {
+    "betterTrades": 0,
+    "worseTrades": 1,
+    "flatTrades": 0,
+    "betterRatePct": 0,
+    "worseRatePct": 100,
+    "flatRatePct": 0
+  },
+  "bpsSummary": {
+    "count": 1,
+    "mean": 35.368416,
+    "median": 35.368416,
+    "stdDev": null,
+    "meanAbs": 35.368416,
+    "min": 35.368416,
+    "p10": 35.368416,
+    "p25": 35.368416,
+    "p50": 35.368416,
+    "p75": 35.368416,
+    "p90": 35.368416,
+    "p95": 35.368416,
+    "p99": 35.368416,
+    "iqr": 0,
+    "max": 35.368416
+  },
+  "usdSummary": {
+    "totalInputUsd": 9863.82003383,
+    "totalOutputUsd": 9828.93326443,
+    "netUsdDelta": 34.8867694,
+    "weightedShortfallBps": 35.368416,
+    "meanInputUsd": 9863.82003383,
+    "medianInputUsd": 9863.82003383,
+    "meanOutputUsd": 9828.93326443,
+    "medianOutputUsd": 9828.93326443,
+    "meanUsdDelta": 34.8867694,
+    "medianUsdDelta": 34.8867694
+  },
+  "histogramBucketBps": 10,
+  "distribution": [
+    {
+      "bucketStartBps": 30,
+      "bucketEndBps": 40,
+      "count": 1
+    }
+  ],
+  "output": {
+    "directory": "/home/alpinevm/Development/rift/historical-dex-comp/data/analytics/execution-quality/lifi/eip155_1__weth__to__eip155_1__cbbtc",
+    "tradesCsv": "/home/alpinevm/Development/rift/historical-dex-comp/data/analytics/execution-quality/lifi/eip155_1__weth__to__eip155_1__cbbtc/trades.csv",
+    "distributionCsv": "/home/alpinevm/Development/rift/historical-dex-comp/data/analytics/execution-quality/lifi/eip155_1__weth__to__eip155_1__cbbtc/distribution.csv",
+    "summaryJson": "/home/alpinevm/Development/rift/historical-dex-comp/data/analytics/execution-quality/lifi/eip155_1__weth__to__eip155_1__cbbtc/summary.json"
+  },
+  "pricingSource": {
+    "venue": "coinbase",
+    "endpoint": "GET /products/{product_id}/candles",
+    "granularitySeconds": 60,
+    "priceFieldUsed": "close",
+    "cacheDbPath": "/home/alpinevm/Development/rift/historical-dex-comp/data/analytics/coinbase-price-cache.sqlite",
+    "stablecoinPegMode": "usd_1",
+    "stablecoinUsdPegSymbols": [
+      "DAI",
+      "FRAX",
+      "PYUSD",
+      "USDC",
+      "USDC.E",
+      "USDCE",
+      "USDE",
+      "USDT",
+      "USDT0"
+    ]
+  }
+}

@@ -1,0 +1,21 @@
+services:
+  ingester:
+    image: oven/bun:1
+    working_dir: /app
+    user: "${UID:-1000}:${GID:-1000}"
+    env_file:
+      - .env
+    environment:
+      PROVIDERS: ${PROVIDERS:-lifi,relay,thorchain,chainflip,garden,nearintents,kyberswap}
+      MODE: ${MODE:-backfill_older}
+      STOP_AT_OLDEST: ${STOP_AT_OLDEST:-}
+    volumes:
+      - ./:/app
+    command: >
+      sh -lc '
+        set -eu;
+        bun install --frozen-lockfile;
+        bun run index.ts ingest-loop "$${MODE}" --providers "$${PROVIDERS}" --stop-at-oldest "$${STOP_AT_OLDEST}";
+      '
+    stop_grace_period: 2m
+    restart: on-failure

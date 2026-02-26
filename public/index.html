@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Historical DEX Analytics</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/styles.css" />
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+  </head>
+  <body>
+    <div class="bg-orb orb-a"></div>
+    <div class="bg-orb orb-b"></div>
+
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-dot"></div>
+        <div>
+          <p class="eyebrow">historical-dex-comp</p>
+          <h1>Execution Analytics</h1>
+        </div>
+      </div>
+      <div class="controls">
+        <button id="refresh-btn" type="button">Refresh</button>
+      </div>
+    </header>
+
+    <main class="content">
+      <section class="card panel shortfall-panel">
+        <div class="panel-header">
+          <h2>Implementation Shortfall vs USD Notional</h2>
+          <div class="shortfall-controls">
+            <label>
+              View
+              <select id="shortfall-view-select">
+                <option value="usdc_eth_to_btc_bitcoin_all" selected>
+                  USDC/ethereum -> BTC/bitcoin
+                </option>
+                <option value="usdt_eth_to_btc_bitcoin_all">
+                  USDT/ethereum -> BTC/bitcoin
+                </option>
+                <option value="eth_eth_to_btc_bitcoin_all">
+                  ETH/ethereum -> BTC/bitcoin
+                </option>
+                <option value="btc_bitcoin_to_usdc_eth_all">
+                  BTC/bitcoin -> USDC/ethereum
+                </option>
+                <option value="btc_bitcoin_to_usdt_eth_all">
+                  BTC/bitcoin -> USDT/ethereum
+                </option>
+                <option value="btc_bitcoin_to_eth_eth_all">
+                  BTC/bitcoin -> ETH/ethereum
+                </option>
+                <option value="usdc_eth_to_cbbtc_eth_all_kyberswap">
+                  USDC/ethereum -> CBBTC/ethereum (KyberSwap+LI.FI+Relay)
+                </option>
+                <option value="eth_eth_to_cbbtc_eth_all_kyberswap">
+                  ETH/ethereum -> CBBTC/ethereum (KyberSwap+LI.FI+Relay)
+                </option>
+                <option value="usdt_eth_to_cbbtc_eth_all_kyberswap">
+                  USDT/ethereum -> CBBTC/ethereum (KyberSwap+LI.FI+Relay)
+                </option>
+                <option value="weth_eth_to_cbbtc_eth_all_kyberswap">
+                  WETH/ethereum -> CBBTC/ethereum (KyberSwap+LI.FI+Relay)
+                </option>
+              </select>
+            </label>
+            <label>
+              Y Scale
+              <select id="shortfall-y-scale-select">
+                <option value="linear">Linear</option>
+                <option value="signed_log" selected>Log</option>
+              </select>
+            </label>
+            <label>
+              Spread Band
+              <input id="shortfall-band-toggle" type="checkbox" />
+            </label>
+          </div>
+        </div>
+        <div class="chart shortfall-quantile-chart" id="shortfall-quantile-chart"></div>
+      </section>
+
+      <section class="card table-panel">
+        <div class="panel-header">
+          <h2>Provider Detail</h2>
+          <span class="panel-meta" id="status-text">Loading...</span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Provider</th>
+                <th>Total Swaps</th>
+                <th>Priced Swaps</th>
+                <th>Total Volume (Input USD)</th>
+                <th>Range Analyzed (UTC)</th>
+                <th>State</th>
+              </tr>
+            </thead>
+            <tbody id="providers-body"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>

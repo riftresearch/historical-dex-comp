@@ -1,0 +1,133 @@
+{
+  "generatedAt": "2026-02-25T03:20:38.944Z",
+  "provider": "garden",
+  "tokenPath": {
+    "sourceChainCanonical": "bitcoin:mainnet",
+    "sourceTokenSymbol": "BTC",
+    "destinationChainCanonical": "eip155:1",
+    "destinationTokenSymbol": "USDT"
+  },
+  "window": {
+    "startAtIso": "2026-01-21T00:00:00.000Z",
+    "endAtIso": "2026-02-21T23:59:59.999Z"
+  },
+  "notionalUsdFilter": {
+    "min": null,
+    "max": null,
+    "minInclusive": false,
+    "maxInclusive": false,
+    "minExclusive": null,
+    "maxExclusive": null,
+    "minInclusiveValue": null,
+    "maxInclusiveValue": null
+  },
+  "signConvention": {
+    "positiveBps": "output USD < input USD (worse for user)",
+    "negativeBps": "output USD > input USD (better for user)"
+  },
+  "totals": {
+    "matchedTrades": 117,
+    "pricedTrades": 117,
+    "skippedInvalidTimestamp": 0,
+    "skippedMissingAmount": 0,
+    "skippedNonPositiveAmount": 0,
+    "skippedMissingPrice": 0,
+    "skippedOutsideNotionalBand": 0,
+    "pricedMatchRatePct": 100
+  },
+  "outcomeSummary": {
+    "betterTrades": 2,
+    "worseTrades": 115,
+    "flatTrades": 0,
+    "betterRatePct": 1.7094,
+    "worseRatePct": 98.2906,
+    "flatRatePct": 0
+  },
+  "bpsSummary": {
+    "count": 117,
+    "mean": 19.904311,
+    "median": 20.402835,
+    "stdDev": 8.255279,
+    "meanAbs": 20.183138,
+    "min": -10.452441,
+    "p10": 10.740334,
+    "p25": 15.795765,
+    "p50": 20.402835,
+    "p75": 23.665773,
+    "p90": 30.199559,
+    "p95": 34.695924,
+    "p99": 38.753834,
+    "iqr": 7.870008,
+    "max": 39.639647
+  },
+  "usdSummary": {
+    "totalInputUsd": 260540.58221348,
+    "totalOutputUsd": 260028.075616,
+    "netUsdDelta": 512.50659748,
+    "weightedShortfallBps": 19.670893,
+    "meanInputUsd": 2226.84258302,
+    "medianInputUsd": 527.02245793,
+    "meanOutputUsd": 2222.46218475,
+    "medianOutputUsd": 526.105501,
+    "meanUsdDelta": 4.38039827,
+    "medianUsdDelta": 0.91695693
+  },
+  "histogramBucketBps": 10,
+  "distribution": [
+    {
+      "bucketStartBps": -20,
+      "bucketEndBps": -10,
+      "count": 1
+    },
+    {
+      "bucketStartBps": -10,
+      "bucketEndBps": 0,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 0,
+      "bucketEndBps": 10,
+      "count": 8
+    },
+    {
+      "bucketStartBps": 10,
+      "bucketEndBps": 20,
+      "count": 46
+    },
+    {
+      "bucketStartBps": 20,
+      "bucketEndBps": 30,
+      "count": 48
+    },
+    {
+      "bucketStartBps": 30,
+      "bucketEndBps": 40,
+      "count": 13
+    }
+  ],
+  "output": {
+    "directory": "/home/alpinevm/Development/rift/historical-dex-comp/data/analytics/execution-quality/garden/bitcoin_mainnet__btc__to__eip155_1__usdt",
+    "tradesCsv": "/home/alpinevm/Development/rift/historical-dex-comp/data/analytics/execution-quality/garden/bitcoin_mainnet__btc__to__eip155_1__usdt/trades.csv",
+    "distributionCsv": "/home/alpinevm/Development/rift/historical-dex-comp/data/analytics/execution-quality/garden/bitcoin_mainnet__btc__to__eip155_1__usdt/distribution.csv",
+    "summaryJson": "/home/alpinevm/Development/rift/historical-dex-comp/data/analytics/execution-quality/garden/bitcoin_mainnet__btc__to__eip155_1__usdt/summary.json"
+  },
+  "pricingSource": {
+    "venue": "coinbase",
+    "endpoint": "GET /products/{product_id}/candles",
+    "granularitySeconds": 60,
+    "priceFieldUsed": "close",
+    "cacheDbPath": "/home/alpinevm/Development/rift/historical-dex-comp/data/analytics/coinbase-price-cache.sqlite",
+    "stablecoinPegMode": "usd_1",
+    "stablecoinUsdPegSymbols": [
+      "DAI",
+      "FRAX",
+      "PYUSD",
+      "USDC",
+      "USDC.E",
+      "USDCE",
+      "USDE",
+      "USDT",
+      "USDT0"
+    ]
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "name": "historical-dex-comp",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "start": "bun run index.ts",
+    "typecheck": "bunx tsc --noEmit",
+    "migrate": "bun run index.ts migrate",
+    "ingest": "bun run index.ts ingest",
+    "ingest-loop": "bun run index.ts ingest-loop",
+    "repair": "bun run index.ts repair",
+    "heal": "bun run index.ts heal",
+    "integrity": "bun run index.ts integrity",
+    "dashboard": "bun run index.ts dashboard",
+    "implementation-shortfall": "bun run src/analytics/implementation-shortfall.ts",
+    "regen-frontend-precomputed": "bun run src/analytics/regen-frontend-precomputed.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@duckdb/node-api": "^1.4.4-r.1"
+  }
+}

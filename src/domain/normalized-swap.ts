@@ -1,0 +1,50 @@
+import type { ProviderKey } from "./provider-key";
+import type { CanonicalStatus } from "./status";
+
+export interface NormalizedSwapRowInput {
+  normalized_id: string;
+  provider_key: ProviderKey;
+  provider_record_id: string;
+  provider_parent_id?: string | null;
+  record_granularity: string;
+  status_canonical: CanonicalStatus;
+  status_raw?: string | null;
+  failure_reason_raw?: string | null;
+  created_at?: Date | null;
+  updated_at?: Date | null;
+  event_at?: Date | null;
+  source_chain_canonical?: string | null;
+  destination_chain_canonical?: string | null;
+  source_chain_raw?: string | null;
+  destination_chain_raw?: string | null;
+  source_chain_id_raw?: string | null;
+  destination_chain_id_raw?: string | null;
+  source_asset_id?: string | null;
+  destination_asset_id?: string | null;
+  source_asset_symbol?: string | null;
+  destination_asset_symbol?: string | null;
+  source_asset_decimals?: number | null;
+  destination_asset_decimals?: number | null;
+  amount_in_atomic?: string | null;
+  amount_out_atomic?: string | null;
+  amount_in_normalized?: number | null;
+  amount_out_normalized?: number | null;
+  amount_in_usd?: number | null;
+  amount_out_usd?: number | null;
+  fee_atomic?: string | null;
+  fee_normalized?: number | null;
+  fee_usd?: number | null;
+  slippage_bps?: number | null;
+  solver_id?: string | null;
+  route_hint?: string | null;
+  source_tx_hash?: string | null;
+  destination_tx_hash?: string | null;
+  refund_tx_hash?: string | null;
+  extra_tx_hashes?: string[] | null;
+  is_final?: boolean | null;
+  raw_hash_latest: string;
+  source_endpoint: string;
+  ingested_at: Date;
+  run_id: string;
+}
+

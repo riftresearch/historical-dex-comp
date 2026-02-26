@@ -1,0 +1,163 @@
+{
+  "generatedAt": "2026-02-25T23:13:48.644Z",
+  "provider": "kyberswap",
+  "tokenPath": {
+    "sourceChainCanonical": "eip155:1",
+    "sourceTokenSymbol": "ETH",
+    "destinationChainCanonical": "eip155:1",
+    "destinationTokenSymbol": "CBBTC"
+  },
+  "window": {
+    "startAtIso": "2026-01-01T00:00:00.000Z",
+    "endAtIso": "2026-02-25T23:59:59.000Z"
+  },
+  "notionalUsdFilter": {
+    "min": null,
+    "max": null,
+    "minInclusive": false,
+    "maxInclusive": false,
+    "minExclusive": null,
+    "maxExclusive": null,
+    "minInclusiveValue": null,
+    "maxInclusiveValue": null
+  },
+  "signConvention": {
+    "positiveBps": "output USD < input USD (worse for user)",
+    "negativeBps": "output USD > input USD (better for user)"
+  },
+  "totals": {
+    "matchedTrades": 169,
+    "pricedTrades": 169,
+    "skippedInvalidTimestamp": 0,
+    "skippedMissingAmount": 0,
+    "skippedNonPositiveAmount": 0,
+    "skippedMissingPrice": 0,
+    "skippedOutsideNotionalBand": 0,
+    "pricedMatchRatePct": 100
+  },
+  "outcomeSummary": {
+    "betterTrades": 48,
+    "worseTrades": 121,
+    "flatTrades": 0,
+    "betterRatePct": 28.4024,
+    "worseRatePct": 71.5976,
+    "flatRatePct": 0
+  },
+  "bpsSummary": {
+    "count": 169,
+    "mean": 0.864103,
+    "median": 3.948101,
+    "stdDev": 21.37077,
+    "meanAbs": 11.591758,
+    "min": -145.343867,
+    "p10": -12.08731,
+    "p25": -1.509005,
+    "p50": 3.948101,
+    "p75": 9.894951,
+    "p90": 12.621287,
+    "p95": 19.30089,
+    "p99": 38.226752,
+    "iqr": 11.403956,
+    "max": 39.893634
+  },
+  "usdSummary": {
+    "totalInputUsd": 231934.67698413,
+    "totalOutputUsd": 231600.91803066,
+    "netUsdDelta": 333.75895347,
+    "weightedShortfallBps": 14.390214,
+    "meanInputUsd": 1372.39453837,
+    "medianInputUsd": 4.639005,
+    "meanOutputUsd": 1370.41963332,
+    "medianOutputUsd": 4.65500489,
+    "meanUsdDelta": 1.97490505,
+    "medianUsdDelta": 0.00251109
+  },
+  "histogramBucketBps": 10,
+  "distribution": [
+    {
+      "bucketStartBps": -150,
+      "bucketEndBps": -140,
+      "count": 1
+    },
+    {
+      "bucketStartBps": -130,
+      "bucketEndBps": -120,
+      "count": 1
+    },
+    {
+      "bucketStartBps": -70,
+      "bucketEndBps": -60,
+      "count": 2
+    },
+    {
+      "bucketStartBps": -60,
+      "bucketEndBps": -50,
+      "count": 3
+    },
+    {
+      "bucketStartBps": -50,
+      "bucketEndBps": -40,
+      "count": 1
+    },
+    {
+      "bucketStartBps": -30,
+      "bucketEndBps": -20,
+      "count": 2
+    },
+    {
+      "bucketStartBps": -20,
+      "bucketEndBps": -10,
+      "count": 10
+    },
+    {
+      "bucketStartBps": -10,
+      "bucketEndBps": 0,
+      "count": 28
+    },
+    {
+      "bucketStartBps": 0,
+      "bucketEndBps": 10,
+      "count": 80
+    },
+    {
+      "bucketStartBps": 10,
+      "bucketEndBps": 20,
+      "count": 33
+    },
+    {
+      "bucketStartBps": 20,
+      "bucketEndBps": 30,
+      "count": 5
+    },
+    {
+      "bucketStartBps": 30,
+      "bucketEndBps": 40,
+      "count": 3
+    }
+  ],
+  "output": {
+    "directory": "/home/alpinevm/Development/rift/historical-dex-comp/data/analytics/execution-quality/kyberswap/eip155_1__eth__to__eip155_1__cbbtc",
+    "tradesCsv": "/home/alpinevm/Development/rift/historical-dex-comp/data/analytics/execution-quality/kyberswap/eip155_1__eth__to__eip155_1__cbbtc/trades.csv",
+    "distributionCsv": "/home/alpinevm/Development/rift/historical-dex-comp/data/analytics/execution-quality/kyberswap/eip155_1__eth__to__eip155_1__cbbtc/distribution.csv",
+    "summaryJson": "/home/alpinevm/Development/rift/historical-dex-comp/data/analytics/execution-quality/kyberswap/eip155_1__eth__to__eip155_1__cbbtc/summary.json"
+  },
+  "pricingSource": {
+    "venue": "coinbase",
+    "endpoint": "GET /products/{product_id}/candles",
+    "granularitySeconds": 60,
+    "priceFieldUsed": "close",
+    "cacheDbPath": "/home/alpinevm/Development/rift/historical-dex-comp/data/analytics/coinbase-price-cache.sqlite",
+    "stablecoinPegMode": "usd_1",
+    "stablecoinUsdPegSymbols": [
+      "DAI",
+      "FRAX",
+      "PYUSD",
+      "USDC",
+      "USDC.E",
+      "USDCE",
+      "USDE",
+      "USDT",
+      "USDT0"
+    ]
+  }
+}

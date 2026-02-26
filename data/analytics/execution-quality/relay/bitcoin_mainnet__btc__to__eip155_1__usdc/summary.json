@@ -1,0 +1,373 @@
+{
+  "generatedAt": "2026-02-25T03:13:03.344Z",
+  "provider": "relay",
+  "tokenPath": {
+    "sourceChainCanonical": "bitcoin:mainnet",
+    "sourceTokenSymbol": "BTC",
+    "destinationChainCanonical": "eip155:1",
+    "destinationTokenSymbol": "USDC"
+  },
+  "window": {
+    "startAtIso": "2026-01-21T00:00:00.000Z",
+    "endAtIso": "2026-02-21T23:59:59.999Z"
+  },
+  "notionalUsdFilter": {
+    "min": null,
+    "max": null,
+    "minInclusive": false,
+    "maxInclusive": false,
+    "minExclusive": null,
+    "maxExclusive": null,
+    "minInclusiveValue": null,
+    "maxInclusiveValue": null
+  },
+  "signConvention": {
+    "positiveBps": "output USD < input USD (worse for user)",
+    "negativeBps": "output USD > input USD (better for user)"
+  },
+  "totals": {
+    "matchedTrades": 269,
+    "pricedTrades": 268,
+    "skippedInvalidTimestamp": 0,
+    "skippedMissingAmount": 0,
+    "skippedNonPositiveAmount": 0,
+    "skippedMissingPrice": 1,
+    "skippedOutsideNotionalBand": 0,
+    "pricedMatchRatePct": 99.6283
+  },
+  "outcomeSummary": {
+    "betterTrades": 11,
+    "worseTrades": 257,
+    "flatTrades": 0,
+    "betterRatePct": 4.1045,
+    "worseRatePct": 95.8955,
+    "flatRatePct": 0
+  },
+  "bpsSummary": {
+    "count": 268,
+    "mean": 159.15671,
+    "median": 184.428651,
+    "stdDev": 950.729888,
+    "meanAbs": 382.173259,
+    "min": -3344.573234,
+    "p10": 64.927527,
+    "p25": 167.70753,
+    "p50": 184.428651,
+    "p75": 219.101153,
+    "p90": 316.206955,
+    "p95": 457.769938,
+    "p99": 1876.827745,
+    "iqr": 51.393622,
+    "max": 9480.643237
+  },
+  "usdSummary": {
+    "totalInputUsd": 271561.7182114,
+    "totalOutputUsd": 269564.715891,
+    "netUsdDelta": 1997.0023204,
+    "weightedShortfallBps": 73.537696,
+    "meanInputUsd": 1013.28999333,
+    "medianInputUsd": 34.37681749,
+    "meanOutputUsd": 1005.83849213,
+    "medianOutputUsd": 33.753469,
+    "meanUsdDelta": 7.4515012,
+    "medianUsdDelta": 0.57770263
+  },
+  "histogramBucketBps": 10,
+  "distribution": [
+    {
+      "bucketStartBps": -3350,
+      "bucketEndBps": -3340,
+      "count": 4
+    },
+    {
+      "bucketStartBps": -3340,
+      "bucketEndBps": -3330,
+      "count": 1
+    },
+    {
+      "bucketStartBps": -3330,
+      "bucketEndBps": -3320,
+      "count": 1
+    },
+    {
+      "bucketStartBps": -3270,
+      "bucketEndBps": -3260,
+      "count": 3
+    },
+    {
+      "bucketStartBps": -50,
+      "bucketEndBps": -40,
+      "count": 1
+    },
+    {
+      "bucketStartBps": -10,
+      "bucketEndBps": 0,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 50,
+      "bucketEndBps": 60,
+      "count": 3
+    },
+    {
+      "bucketStartBps": 60,
+      "bucketEndBps": 70,
+      "count": 19
+    },
+    {
+      "bucketStartBps": 70,
+      "bucketEndBps": 80,
+      "count": 7
+    },
+    {
+      "bucketStartBps": 80,
+      "bucketEndBps": 90,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 90,
+      "bucketEndBps": 100,
+      "count": 5
+    },
+    {
+      "bucketStartBps": 100,
+      "bucketEndBps": 110,
+      "count": 2
+    },
+    {
+      "bucketStartBps": 110,
+      "bucketEndBps": 120,
+      "count": 3
+    },
+    {
+      "bucketStartBps": 120,
+      "bucketEndBps": 130,
+      "count": 5
+    },
+    {
+      "bucketStartBps": 130,
+      "bucketEndBps": 140,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 140,
+      "bucketEndBps": 150,
+      "count": 2
+    },
+    {
+      "bucketStartBps": 150,
+      "bucketEndBps": 160,
+      "count": 3
+    },
+    {
+      "bucketStartBps": 160,
+      "bucketEndBps": 170,
+      "count": 12
+    },
+    {
+      "bucketStartBps": 170,
+      "bucketEndBps": 180,
+      "count": 42
+    },
+    {
+      "bucketStartBps": 180,
+      "bucketEndBps": 190,
+      "count": 35
+    },
+    {
+      "bucketStartBps": 190,
+      "bucketEndBps": 200,
+      "count": 25
+    },
+    {
+      "bucketStartBps": 200,
+      "bucketEndBps": 210,
+      "count": 12
+    },
+    {
+      "bucketStartBps": 210,
+      "bucketEndBps": 220,
+      "count": 15
+    },
+    {
+      "bucketStartBps": 220,
+      "bucketEndBps": 230,
+      "count": 5
+    },
+    {
+      "bucketStartBps": 230,
+      "bucketEndBps": 240,
+      "count": 6
+    },
+    {
+      "bucketStartBps": 240,
+      "bucketEndBps": 250,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 250,
+      "bucketEndBps": 260,
+      "count": 4
+    },
+    {
+      "bucketStartBps": 260,
+      "bucketEndBps": 270,
+      "count": 6
+    },
+    {
+      "bucketStartBps": 270,
+      "bucketEndBps": 280,
+      "count": 4
+    },
+    {
+      "bucketStartBps": 280,
+      "bucketEndBps": 290,
+      "count": 5
+    },
+    {
+      "bucketStartBps": 290,
+      "bucketEndBps": 300,
+      "count": 2
+    },
+    {
+      "bucketStartBps": 300,
+      "bucketEndBps": 310,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 310,
+      "bucketEndBps": 320,
+      "count": 4
+    },
+    {
+      "bucketStartBps": 320,
+      "bucketEndBps": 330,
+      "count": 2
+    },
+    {
+      "bucketStartBps": 330,
+      "bucketEndBps": 340,
+      "count": 2
+    },
+    {
+      "bucketStartBps": 340,
+      "bucketEndBps": 350,
+      "count": 2
+    },
+    {
+      "bucketStartBps": 350,
+      "bucketEndBps": 360,
+      "count": 2
+    },
+    {
+      "bucketStartBps": 370,
+      "bucketEndBps": 380,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 400,
+      "bucketEndBps": 410,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 420,
+      "bucketEndBps": 430,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 450,
+      "bucketEndBps": 460,
+      "count": 3
+    },
+    {
+      "bucketStartBps": 480,
+      "bucketEndBps": 490,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 490,
+      "bucketEndBps": 500,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 550,
+      "bucketEndBps": 560,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 680,
+      "bucketEndBps": 690,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 760,
+      "bucketEndBps": 770,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 770,
+      "bucketEndBps": 780,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 800,
+      "bucketEndBps": 810,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 1080,
+      "bucketEndBps": 1090,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 1370,
+      "bucketEndBps": 1380,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 1770,
+      "bucketEndBps": 1780,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 2080,
+      "bucketEndBps": 2090,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 5960,
+      "bucketEndBps": 5970,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 9480,
+      "bucketEndBps": 9490,
+      "count": 1
+    }
+  ],
+  "output": {
+    "directory": "/home/alpinevm/Development/rift/historical-dex-comp/data/analytics/execution-quality/relay/bitcoin_mainnet__btc__to__eip155_1__usdc",
+    "tradesCsv": "/home/alpinevm/Development/rift/historical-dex-comp/data/analytics/execution-quality/relay/bitcoin_mainnet__btc__to__eip155_1__usdc/trades.csv",
+    "distributionCsv": "/home/alpinevm/Development/rift/historical-dex-comp/data/analytics/execution-quality/relay/bitcoin_mainnet__btc__to__eip155_1__usdc/distribution.csv",
+    "summaryJson": "/home/alpinevm/Development/rift/historical-dex-comp/data/analytics/execution-quality/relay/bitcoin_mainnet__btc__to__eip155_1__usdc/summary.json"
+  },
+  "pricingSource": {
+    "venue": "coinbase",
+    "endpoint": "GET /products/{product_id}/candles",
+    "granularitySeconds": 60,
+    "priceFieldUsed": "close",
+    "cacheDbPath": "/home/alpinevm/Development/rift/historical-dex-comp/data/analytics/coinbase-price-cache.sqlite",
+    "stablecoinPegMode": "usd_1",
+    "stablecoinUsdPegSymbols": [
+      "DAI",
+      "FRAX",
+      "PYUSD",
+      "USDC",
+      "USDC.E",
+      "USDCE",
+      "USDE",
+      "USDT",
+      "USDT0"
+    ]
+  }
+}

@@ -1,0 +1,2 @@
+normalized_id,provider_record_id,event_at,event_minute_ts,source_chain_canonical,destination_chain_canonical,source_token_symbol,destination_token_symbol,amount_in,amount_out,source_price_usd,destination_price_usd,input_usd,output_usd,implementation_shortfall_bps
+0x390c9d137243fffc39222b44590a59addc51cacbf6056b68d898c7f9029fa237,0x390c9d137243fffc39222b44590a59addc51cacbf6056b68d898c7f9029fa237,2026-01-29T16:41:14.595Z,1769704860,eip155:1,eip155:1,USDC,CBBTC,3994.896845,0.0467966,1,84609.02,3994.896845,3959.41446533,88.819264

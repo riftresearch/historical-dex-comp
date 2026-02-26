@@ -1,0 +1,163 @@
+{
+  "generatedAt": "2026-02-25T23:14:23.419Z",
+  "provider": "lifi",
+  "tokenPath": {
+    "sourceChainCanonical": "eip155:1",
+    "sourceTokenSymbol": "USDT",
+    "destinationChainCanonical": "eip155:1",
+    "destinationTokenSymbol": "CBBTC"
+  },
+  "window": {
+    "startAtIso": "2026-01-01T00:00:00.000Z",
+    "endAtIso": "2026-02-25T23:59:59.000Z"
+  },
+  "notionalUsdFilter": {
+    "min": null,
+    "max": null,
+    "minInclusive": false,
+    "maxInclusive": false,
+    "minExclusive": null,
+    "maxExclusive": null,
+    "minInclusiveValue": null,
+    "maxInclusiveValue": null
+  },
+  "signConvention": {
+    "positiveBps": "output USD < input USD (worse for user)",
+    "negativeBps": "output USD > input USD (better for user)"
+  },
+  "totals": {
+    "matchedTrades": 71,
+    "pricedTrades": 71,
+    "skippedInvalidTimestamp": 0,
+    "skippedMissingAmount": 0,
+    "skippedNonPositiveAmount": 0,
+    "skippedMissingPrice": 0,
+    "skippedOutsideNotionalBand": 0,
+    "pricedMatchRatePct": 100
+  },
+  "outcomeSummary": {
+    "betterTrades": 11,
+    "worseTrades": 60,
+    "flatTrades": 0,
+    "betterRatePct": 15.493,
+    "worseRatePct": 84.507,
+    "flatRatePct": 0
+  },
+  "bpsSummary": {
+    "count": 71,
+    "mean": 17.726026,
+    "median": 12.315322,
+    "stdDev": 200.484151,
+    "meanAbs": 51.81787,
+    "min": -1172.24875,
+    "p10": -1.038857,
+    "p25": 5.607195,
+    "p50": 12.315322,
+    "p75": 22.189405,
+    "p90": 59.417203,
+    "p95": 62.717625,
+    "p99": 424.236075,
+    "iqr": 16.58221,
+    "max": 1187.416819
+  },
+  "usdSummary": {
+    "totalInputUsd": 558238.876731,
+    "totalOutputUsd": 556666.51558234,
+    "netUsdDelta": 1572.36114866,
+    "weightedShortfallBps": 28.166457,
+    "meanInputUsd": 7862.51939058,
+    "medianInputUsd": 902,
+    "meanOutputUsd": 7840.37345891,
+    "medianOutputUsd": 901.13572708,
+    "meanUsdDelta": 22.14593167,
+    "medianUsdDelta": 0.86427292
+  },
+  "histogramBucketBps": 10,
+  "distribution": [
+    {
+      "bucketStartBps": -1180,
+      "bucketEndBps": -1170,
+      "count": 1
+    },
+    {
+      "bucketStartBps": -20,
+      "bucketEndBps": -10,
+      "count": 1
+    },
+    {
+      "bucketStartBps": -10,
+      "bucketEndBps": 0,
+      "count": 9
+    },
+    {
+      "bucketStartBps": 0,
+      "bucketEndBps": 10,
+      "count": 16
+    },
+    {
+      "bucketStartBps": 10,
+      "bucketEndBps": 20,
+      "count": 22
+    },
+    {
+      "bucketStartBps": 20,
+      "bucketEndBps": 30,
+      "count": 10
+    },
+    {
+      "bucketStartBps": 30,
+      "bucketEndBps": 40,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 40,
+      "bucketEndBps": 50,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 50,
+      "bucketEndBps": 60,
+      "count": 4
+    },
+    {
+      "bucketStartBps": 60,
+      "bucketEndBps": 70,
+      "count": 4
+    },
+    {
+      "bucketStartBps": 90,
+      "bucketEndBps": 100,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 1180,
+      "bucketEndBps": 1190,
+      "count": 1
+    }
+  ],
+  "output": {
+    "directory": "/home/alpinevm/Development/rift/historical-dex-comp/data/analytics/execution-quality/lifi/eip155_1__usdt__to__eip155_1__cbbtc",
+    "tradesCsv": "/home/alpinevm/Development/rift/historical-dex-comp/data/analytics/execution-quality/lifi/eip155_1__usdt__to__eip155_1__cbbtc/trades.csv",
+    "distributionCsv": "/home/alpinevm/Development/rift/historical-dex-comp/data/analytics/execution-quality/lifi/eip155_1__usdt__to__eip155_1__cbbtc/distribution.csv",
+    "summaryJson": "/home/alpinevm/Development/rift/historical-dex-comp/data/analytics/execution-quality/lifi/eip155_1__usdt__to__eip155_1__cbbtc/summary.json"
+  },
+  "pricingSource": {
+    "venue": "coinbase",
+    "endpoint": "GET /products/{product_id}/candles",
+    "granularitySeconds": 60,
+    "priceFieldUsed": "close",
+    "cacheDbPath": "/home/alpinevm/Development/rift/historical-dex-comp/data/analytics/coinbase-price-cache.sqlite",
+    "stablecoinPegMode": "usd_1",
+    "stablecoinUsdPegSymbols": [
+      "DAI",
+      "FRAX",
+      "PYUSD",
+      "USDC",
+      "USDC.E",
+      "USDCE",
+      "USDE",
+      "USDT",
+      "USDT0"
+    ]
+  }
+}
