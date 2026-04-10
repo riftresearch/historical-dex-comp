@@ -16,7 +16,7 @@ import type { LifiToken, LifiTransferRecord, LifiTransfersResponse } from "./typ
 
 const LIFI_BASE_URL = "https://li.quest";
 const LIFI_SOURCE_ENDPOINT = `${LIFI_BASE_URL}/v1/analytics/transfers`;
-const LIFI_STREAM_KEY = "swaps:lifi:analytics:transfers:v1:evm_paths";
+const LIFI_STREAM_KEY = "swaps:lifi:analytics:transfers:v2:scoped_paths";
 const LIFI_WINDOW_DAYS = 30;
 const LIFI_RESPONSE_CAP = 1_000;
 const LIFI_PAGE_SIZE_DEFAULT = 1_000;
@@ -28,8 +28,11 @@ const CHAIN_ID_MAINNET = "1";
 const CHAIN_CANONICAL_MAINNET = "eip155:1";
 const CHAIN_ID_BASE = "8453";
 const CHAIN_CANONICAL_BASE = "eip155:8453";
+const CHAIN_ID_BITCOIN = "20000000000001";
+const CHAIN_CANONICAL_BITCOIN = "bitcoin:mainnet";
 
 const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
+const BTC_ADDRESS = "bitcoin";
 const USDC_ADDRESS_MAINNET = "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48";
 const USDT_ADDRESS_MAINNET = "0xdac17f958d2ee523a2206206994597c13d831ec7";
 const WETH_ADDRESS_MAINNET = "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2";
@@ -42,11 +45,11 @@ interface LifiRouteScope {
   key: string;
   sourceChainId: string;
   sourceChainCanonical: string;
-  sourceTokenSymbol: "USDC" | "USDT" | "WETH" | "ETH";
+  sourceTokenSymbol: "USDC" | "USDT" | "WETH" | "ETH" | "BTC";
   sourceTokenAddress: string;
   destinationChainId: string;
   destinationChainCanonical: string;
-  destinationTokenSymbol: "USDC" | "ETH" | "CBBTC";
+  destinationTokenSymbol: "USDC" | "USDT" | "ETH" | "WETH" | "CBBTC" | "BTC";
   destinationTokenAddress: string;
 }
 
@@ -90,27 +93,81 @@ function buildLifiRouteScopes(): LifiRouteScope[] {
       });
     }
 
+    const ethLikeRoutes = [
+      { symbol: "ETH" as const, address: ZERO_ADDRESS },
+      { symbol: "WETH" as const, address: chain.wethAddress },
+    ];
+    for (const route of ethLikeRoutes) {
+      scopes.push({
+        key: `${chain.chainId}:USDC->${route.symbol}`,
+        sourceChainId: chain.chainId,
+        sourceChainCanonical: chain.chainCanonical,
+        sourceTokenSymbol: "USDC",
+        sourceTokenAddress: chain.usdcAddress,
+        destinationChainId: chain.chainId,
+        destinationChainCanonical: chain.chainCanonical,
+        destinationTokenSymbol: route.symbol,
+        destinationTokenAddress: route.address,
+      });
+      scopes.push({
+        key: `${chain.chainId}:${route.symbol}->USDC`,
+        sourceChainId: chain.chainId,
+        sourceChainCanonical: chain.chainCanonical,
+        sourceTokenSymbol: route.symbol,
+        sourceTokenAddress: route.address,
+        destinationChainId: chain.chainId,
+        destinationChainCanonical: chain.chainCanonical,
+        destinationTokenSymbol: "USDC",
+        destinationTokenAddress: chain.usdcAddress,
+      });
+    }
+  }
+
+  const mainnetEthLikeRoutes = [
+    { symbol: "ETH" as const, address: ZERO_ADDRESS },
+    { symbol: "WETH" as const, address: WETH_ADDRESS_MAINNET },
+  ];
+  const mainnetToBitcoinRoutes: Array<Pick<LifiRouteScope, "sourceTokenSymbol" | "sourceTokenAddress">> = [
+    { sourceTokenSymbol: "USDC", sourceTokenAddress: USDC_ADDRESS_MAINNET },
+    { sourceTokenSymbol: "USDT", sourceTokenAddress: USDT_ADDRESS_MAINNET },
+    ...mainnetEthLikeRoutes.map((route) => ({
+      sourceTokenSymbol: route.symbol,
+      sourceTokenAddress: route.address,
+    })),
+  ];
+  for (const route of mainnetToBitcoinRoutes) {
     scopes.push({
-      key: `${chain.chainId}:USDC->ETH`,
-      sourceChainId: chain.chainId,
-      sourceChainCanonical: chain.chainCanonical,
-      sourceTokenSymbol: "USDC",
-      sourceTokenAddress: chain.usdcAddress,
-      destinationChainId: chain.chainId,
-      destinationChainCanonical: chain.chainCanonical,
-      destinationTokenSymbol: "ETH",
-      destinationTokenAddress: ZERO_ADDRESS,
+      key: `${CHAIN_ID_MAINNET}:${route.sourceTokenSymbol}->BTC`,
+      sourceChainId: CHAIN_ID_MAINNET,
+      sourceChainCanonical: CHAIN_CANONICAL_MAINNET,
+      sourceTokenSymbol: route.sourceTokenSymbol,
+      sourceTokenAddress: route.sourceTokenAddress,
+      destinationChainId: CHAIN_ID_BITCOIN,
+      destinationChainCanonical: CHAIN_CANONICAL_BITCOIN,
+      destinationTokenSymbol: "BTC",
+      destinationTokenAddress: BTC_ADDRESS,
     });
+  }
+
+  const bitcoinToMainnetRoutes: Array<Pick<LifiRouteScope, "destinationTokenSymbol" | "destinationTokenAddress">> = [
+    { destinationTokenSymbol: "USDC", destinationTokenAddress: USDC_ADDRESS_MAINNET },
+    { destinationTokenSymbol: "USDT", destinationTokenAddress: USDT_ADDRESS_MAINNET },
+    ...mainnetEthLikeRoutes.map((route) => ({
+      destinationTokenSymbol: route.symbol,
+      destinationTokenAddress: route.address,
+    })),
+  ];
+  for (const route of bitcoinToMainnetRoutes) {
     scopes.push({
-      key: `${chain.chainId}:ETH->USDC`,
-      sourceChainId: chain.chainId,
-      sourceChainCanonical: chain.chainCanonical,
-      sourceTokenSymbol: "ETH",
-      sourceTokenAddress: ZERO_ADDRESS,
-      destinationChainId: chain.chainId,
-      destinationChainCanonical: chain.chainCanonical,
-      destinationTokenSymbol: "USDC",
-      destinationTokenAddress: chain.usdcAddress,
+      key: `${CHAIN_ID_BITCOIN}:BTC->${route.destinationTokenSymbol}`,
+      sourceChainId: CHAIN_ID_BITCOIN,
+      sourceChainCanonical: CHAIN_CANONICAL_BITCOIN,
+      sourceTokenSymbol: "BTC",
+      sourceTokenAddress: BTC_ADDRESS,
+      destinationChainId: CHAIN_ID_MAINNET,
+      destinationChainCanonical: CHAIN_CANONICAL_MAINNET,
+      destinationTokenSymbol: route.destinationTokenSymbol,
+      destinationTokenAddress: route.destinationTokenAddress,
     });
   }
   return scopes;
@@ -202,10 +259,13 @@ function normalizeHash(value: string | null | undefined): string | null {
     return null;
   }
   const normalized = value.trim().toLowerCase();
-  if (!/^0x[a-f0-9]{64}$/.test(normalized)) {
-    return null;
+  if (/^0x[a-f0-9]{64}$/.test(normalized)) {
+    return normalized;
   }
-  return normalized;
+  if (/^[a-f0-9]{64}$/.test(normalized)) {
+    return normalized;
+  }
+  return null;
 }
 
 function normalizeSymbol(value: string | null | undefined): string | null {
@@ -411,7 +471,8 @@ function deriveEventAt(record: LifiTransferRecord): Date | null {
 
 function toAssetId(token: LifiToken | null | undefined): string | null {
   const chainIdRaw = toStringOrNull(token?.chainId);
-  const address = normalizeAddress(token?.address);
+  const rawAddress = nonEmptyOrNull(token?.address)?.toLowerCase() ?? null;
+  const address = normalizeAddress(token?.address) ?? (rawAddress === BTC_ADDRESS ? BTC_ADDRESS : null);
 
   if (address === ZERO_ADDRESS) {
     if (chainIdRaw) {

@@ -40,16 +40,18 @@ const DEFAULT_DESTINATION_CHAIN = "bitcoin:mainnet";
 const DEFAULT_DESTINATION_TOKEN = "BTC";
 const DEFAULT_INCLUDE_REVERSE_PATHS = true;
 const DEFAULT_STABLECOIN_MODE: StablecoinPegMode = "usd_1";
-const CBBTC_EXTRA_PROVIDERS: readonly ProviderKey[] = ["kyberswap", "lifi", "relay", "cowswap"];
 const CBBTC_EXTRA_CHAINS = ["eip155:1", "eip155:8453"] as const;
 const CBBTC_EXTRA_DESTINATION_TOKEN = "CBBTC";
 const CBBTC_EXTRA_SOURCE_TOKENS = ["USDC", "USDT", "ETH"] as const;
-const ETH_USDC_EXTRA_PROVIDERS: readonly ProviderKey[] = ["kyberswap", "lifi", "relay", "cowswap"];
 const ETH_USDC_EXTRA_CHAINS = ["eip155:1", "eip155:8453"] as const;
 const ETH_USDC_EXTRA_PAIR_TASKS = [
   { sourceToken: "USDC", destinationToken: "ETH" },
   { sourceToken: "ETH", destinationToken: "USDC" },
 ] as const;
+
+function canProviderSupportBitcoinPath(provider: ProviderKey): boolean {
+  return provider !== "kyberswap" && provider !== "cowswap";
+}
 
 function parsePositiveInt(name: string, rawValue: string): number {
   const parsed = Number(rawValue);
@@ -125,8 +127,9 @@ Options:
   --stablecoin-peg-mode <off|usd_1>      (default: usd_1)
 
 Notes:
-  If kyberswap, lifi, relay, and/or cowswap are included in --providers, this script
-  also precomputes eip155:1 and eip155:8453 paths for USDC/USDT/ETH -> CBBTC.
+  Bitcoin paths skip inherently same-chain providers kyberswap and cowswap.
+  For every provider included in --providers, this script also precomputes
+  eip155:1 and eip155:8453 paths for USDC/USDT/ETH -> CBBTC.
   It also precomputes eip155:1 and eip155:8453 paths for USDC -> ETH and ETH -> USDC.
 
 Example:
@@ -423,7 +426,9 @@ async function run(): Promise<void> {
     tasks.push(task);
   };
 
-  for (const provider of config.providers) {
+  const bitcoinPathProviders = config.providers.filter(canProviderSupportBitcoinPath);
+
+  for (const provider of bitcoinPathProviders) {
     for (const sourceToken of config.sourceTokens) {
       pushTask({
         provider,
@@ -436,7 +441,7 @@ async function run(): Promise<void> {
   }
 
   if (config.includeReversePaths) {
-    for (const provider of config.providers) {
+    for (const provider of bitcoinPathProviders) {
       for (const destinationTokenSymbol of config.sourceTokens) {
         pushTask({
           provider,
@@ -449,10 +454,7 @@ async function run(): Promise<void> {
     }
   }
 
-  for (const provider of CBBTC_EXTRA_PROVIDERS) {
-    if (!config.providers.includes(provider)) {
-      continue;
-    }
+  for (const provider of config.providers) {
     for (const chainCanonical of CBBTC_EXTRA_CHAINS) {
       for (const sourceToken of CBBTC_EXTRA_SOURCE_TOKENS) {
         pushTask({
@@ -466,10 +468,7 @@ async function run(): Promise<void> {
     }
   }
 
-  for (const provider of ETH_USDC_EXTRA_PROVIDERS) {
-    if (!config.providers.includes(provider)) {
-      continue;
-    }
+  for (const provider of config.providers) {
     for (const chainCanonical of ETH_USDC_EXTRA_CHAINS) {
       for (const pair of ETH_USDC_EXTRA_PAIR_TASKS) {
         pushTask({

@@ -20,6 +20,8 @@ const CHAIN_ALIAS_BY_PROVIDER: Partial<
     "1": "eip155:1",
     base: "eip155:8453",
     "8453": "eip155:8453",
+    bitcoin: "bitcoin:mainnet",
+    "20000000000001": "bitcoin:mainnet",
   },
   relay: {
     bitcoin: "bitcoin:mainnet",

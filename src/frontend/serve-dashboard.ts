@@ -247,8 +247,9 @@ const USD_BUCKET_COMPACT_FORMATTER = new Intl.NumberFormat("en-US", {
   maximumFractionDigits: 1,
 });
 const DEFAULT_SHORTFALL_VIEW_ID = "usdc_base_to_cbbtc_base_all_kyberswap";
-const CBBTC_PATH_PROVIDERS: ProviderKey[] = ["kyberswap", "lifi", "relay", "cowswap"];
-const ETH_USDC_PATH_PROVIDERS: ProviderKey[] = ["kyberswap", "lifi", "relay", "cowswap"];
+const BITCOIN_PATH_PROVIDERS: ProviderKey[] = PROVIDER_KEYS.filter(
+  (providerKey) => providerKey !== "kyberswap" && providerKey !== "cowswap",
+);
 const SHORTFALL_VIEW_CONFIGS: Record<string, ShortfallViewConfig> = {
   usdc_eth_to_btc_bitcoin_all: {
     id: "usdc_eth_to_btc_bitcoin_all",
@@ -266,6 +267,7 @@ const SHORTFALL_VIEW_CONFIGS: Record<string, ShortfallViewConfig> = {
       minInclusive: false,
       maxInclusive: false,
     },
+    providers: BITCOIN_PATH_PROVIDERS,
   },
   usdt_eth_to_btc_bitcoin_all: {
     id: "usdt_eth_to_btc_bitcoin_all",
@@ -283,6 +285,7 @@ const SHORTFALL_VIEW_CONFIGS: Record<string, ShortfallViewConfig> = {
       minInclusive: false,
       maxInclusive: false,
     },
+    providers: BITCOIN_PATH_PROVIDERS,
   },
   eth_eth_to_btc_bitcoin_all: {
     id: "eth_eth_to_btc_bitcoin_all",
@@ -300,6 +303,7 @@ const SHORTFALL_VIEW_CONFIGS: Record<string, ShortfallViewConfig> = {
       minInclusive: false,
       maxInclusive: false,
     },
+    providers: BITCOIN_PATH_PROVIDERS,
   },
   btc_bitcoin_to_usdc_eth_all: {
     id: "btc_bitcoin_to_usdc_eth_all",
@@ -317,6 +321,7 @@ const SHORTFALL_VIEW_CONFIGS: Record<string, ShortfallViewConfig> = {
       minInclusive: false,
       maxInclusive: false,
     },
+    providers: BITCOIN_PATH_PROVIDERS,
   },
   btc_bitcoin_to_usdt_eth_all: {
     id: "btc_bitcoin_to_usdt_eth_all",
@@ -334,6 +339,7 @@ const SHORTFALL_VIEW_CONFIGS: Record<string, ShortfallViewConfig> = {
       minInclusive: false,
       maxInclusive: false,
     },
+    providers: BITCOIN_PATH_PROVIDERS,
   },
   btc_bitcoin_to_eth_eth_all: {
     id: "btc_bitcoin_to_eth_eth_all",
@@ -351,6 +357,7 @@ const SHORTFALL_VIEW_CONFIGS: Record<string, ShortfallViewConfig> = {
       minInclusive: false,
       maxInclusive: false,
     },
+    providers: BITCOIN_PATH_PROVIDERS,
   },
   usdc_eth_to_cbbtc_eth_all_kyberswap: {
     id: "usdc_eth_to_cbbtc_eth_all_kyberswap",
@@ -368,7 +375,6 @@ const SHORTFALL_VIEW_CONFIGS: Record<string, ShortfallViewConfig> = {
       minInclusive: false,
       maxInclusive: false,
     },
-    providers: CBBTC_PATH_PROVIDERS,
   },
   eth_eth_to_cbbtc_eth_all_kyberswap: {
     id: "eth_eth_to_cbbtc_eth_all_kyberswap",
@@ -386,7 +392,6 @@ const SHORTFALL_VIEW_CONFIGS: Record<string, ShortfallViewConfig> = {
       minInclusive: false,
       maxInclusive: false,
     },
-    providers: CBBTC_PATH_PROVIDERS,
   },
   usdt_eth_to_cbbtc_eth_all_kyberswap: {
     id: "usdt_eth_to_cbbtc_eth_all_kyberswap",
@@ -404,7 +409,6 @@ const SHORTFALL_VIEW_CONFIGS: Record<string, ShortfallViewConfig> = {
       minInclusive: false,
       maxInclusive: false,
     },
-    providers: CBBTC_PATH_PROVIDERS,
   },
   usdc_base_to_cbbtc_base_all_kyberswap: {
     id: "usdc_base_to_cbbtc_base_all_kyberswap",
@@ -422,7 +426,6 @@ const SHORTFALL_VIEW_CONFIGS: Record<string, ShortfallViewConfig> = {
       minInclusive: false,
       maxInclusive: false,
     },
-    providers: CBBTC_PATH_PROVIDERS,
   },
   eth_base_to_cbbtc_base_all_kyberswap: {
     id: "eth_base_to_cbbtc_base_all_kyberswap",
@@ -440,7 +443,6 @@ const SHORTFALL_VIEW_CONFIGS: Record<string, ShortfallViewConfig> = {
       minInclusive: false,
       maxInclusive: false,
     },
-    providers: CBBTC_PATH_PROVIDERS,
   },
   usdt_base_to_cbbtc_base_all_kyberswap: {
     id: "usdt_base_to_cbbtc_base_all_kyberswap",
@@ -458,7 +460,6 @@ const SHORTFALL_VIEW_CONFIGS: Record<string, ShortfallViewConfig> = {
       minInclusive: false,
       maxInclusive: false,
     },
-    providers: CBBTC_PATH_PROVIDERS,
   },
   usdc_eth_to_eth_eth_all: {
     id: "usdc_eth_to_eth_eth_all",
@@ -476,7 +477,6 @@ const SHORTFALL_VIEW_CONFIGS: Record<string, ShortfallViewConfig> = {
       minInclusive: false,
       maxInclusive: false,
     },
-    providers: ETH_USDC_PATH_PROVIDERS,
   },
   eth_eth_to_usdc_eth_all: {
     id: "eth_eth_to_usdc_eth_all",
@@ -494,7 +494,6 @@ const SHORTFALL_VIEW_CONFIGS: Record<string, ShortfallViewConfig> = {
       minInclusive: false,
       maxInclusive: false,
     },
-    providers: ETH_USDC_PATH_PROVIDERS,
   },
   usdc_base_to_eth_base_all: {
     id: "usdc_base_to_eth_base_all",
@@ -512,7 +511,6 @@ const SHORTFALL_VIEW_CONFIGS: Record<string, ShortfallViewConfig> = {
       minInclusive: false,
       maxInclusive: false,
     },
-    providers: ETH_USDC_PATH_PROVIDERS,
   },
   eth_base_to_usdc_base_all: {
     id: "eth_base_to_usdc_base_all",
@@ -530,7 +528,6 @@ const SHORTFALL_VIEW_CONFIGS: Record<string, ShortfallViewConfig> = {
       minInclusive: false,
       maxInclusive: false,
     },
-    providers: ETH_USDC_PATH_PROVIDERS,
   },
 };
 
