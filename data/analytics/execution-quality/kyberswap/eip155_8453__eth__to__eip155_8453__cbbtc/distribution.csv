@@ -1,0 +1,7 @@
+bucket_start_bps,bucket_end_bps,count
+-20,-10,5
+-10,0,41
+0,10,66
+10,20,15
+20,30,8
+40,50,1

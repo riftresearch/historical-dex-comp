@@ -1,0 +1,183 @@
+{
+  "generatedAt": "2026-04-10T19:06:39.287Z",
+  "provider": "cowswap",
+  "tokenPath": {
+    "sourceChainCanonical": "eip155:1",
+    "sourceTokenSymbol": "ETH",
+    "destinationChainCanonical": "eip155:1",
+    "destinationTokenSymbol": "CBBTC"
+  },
+  "window": {
+    "startAtIso": "2026-03-11T18:30:00.000Z",
+    "endAtIso": "2026-04-10T18:30:00.000Z"
+  },
+  "notionalUsdFilter": {
+    "min": null,
+    "max": null,
+    "minInclusive": false,
+    "maxInclusive": false,
+    "minExclusive": null,
+    "maxExclusive": null,
+    "minInclusiveValue": null,
+    "maxInclusiveValue": null
+  },
+  "signConvention": {
+    "positiveBps": "output USD < input USD (worse for user)",
+    "negativeBps": "output USD > input USD (better for user)"
+  },
+  "totals": {
+    "matchedTrades": 30,
+    "pricedTrades": 30,
+    "skippedInvalidTimestamp": 0,
+    "skippedMissingAmount": 0,
+    "skippedNonPositiveAmount": 0,
+    "skippedMissingPrice": 0,
+    "skippedOutsideNotionalBand": 0,
+    "pricedMatchRatePct": 100
+  },
+  "outcomeSummary": {
+    "betterTrades": 2,
+    "worseTrades": 28,
+    "flatTrades": 0,
+    "betterRatePct": 6.6667,
+    "worseRatePct": 93.3333,
+    "flatRatePct": 0
+  },
+  "bpsSummary": {
+    "count": 30,
+    "mean": 127.231255,
+    "median": 54.610344,
+    "stdDev": 211.227593,
+    "meanAbs": 128.111657,
+    "min": -7.984248,
+    "p10": 3.948978,
+    "p25": 9.963665,
+    "p50": 54.610344,
+    "p75": 155.532024,
+    "p90": 264.627605,
+    "p95": 407.379201,
+    "p99": 888.316195,
+    "iqr": 145.56836,
+    "max": 1079.386653
+  },
+  "usdSummary": {
+    "totalInputUsd": 961805.98004923,
+    "totalOutputUsd": 960256.3535882,
+    "netUsdDelta": 1549.62646103,
+    "weightedShortfallBps": 16.111633,
+    "meanInputUsd": 32060.19933497,
+    "medianInputUsd": 97.7432542,
+    "meanOutputUsd": 32008.54511961,
+    "medianOutputUsd": 96.32426634,
+    "meanUsdDelta": 51.65421537,
+    "medianUsdDelta": 0.39728318
+  },
+  "histogramBucketBps": 10,
+  "distribution": [
+    {
+      "bucketStartBps": -10,
+      "bucketEndBps": 0,
+      "count": 2
+    },
+    {
+      "bucketStartBps": 0,
+      "bucketEndBps": 10,
+      "count": 6
+    },
+    {
+      "bucketStartBps": 10,
+      "bucketEndBps": 20,
+      "count": 2
+    },
+    {
+      "bucketStartBps": 20,
+      "bucketEndBps": 30,
+      "count": 2
+    },
+    {
+      "bucketStartBps": 40,
+      "bucketEndBps": 50,
+      "count": 3
+    },
+    {
+      "bucketStartBps": 50,
+      "bucketEndBps": 60,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 80,
+      "bucketEndBps": 90,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 90,
+      "bucketEndBps": 100,
+      "count": 2
+    },
+    {
+      "bucketStartBps": 100,
+      "bucketEndBps": 110,
+      "count": 2
+    },
+    {
+      "bucketStartBps": 120,
+      "bucketEndBps": 130,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 160,
+      "bucketEndBps": 170,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 170,
+      "bucketEndBps": 180,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 180,
+      "bucketEndBps": 190,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 230,
+      "bucketEndBps": 240,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 250,
+      "bucketEndBps": 260,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 390,
+      "bucketEndBps": 400,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 420,
+      "bucketEndBps": 430,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 1070,
+      "bucketEndBps": 1080,
+      "count": 1
+    }
+  ],
+  "output": {
+    "directory": "/home/alpinevm/Development/rift/historical-dex-comp/data/analytics/execution-quality/cowswap/eip155_1__eth__to__eip155_1__cbbtc",
+    "tradesCsv": "/home/alpinevm/Development/rift/historical-dex-comp/data/analytics/execution-quality/cowswap/eip155_1__eth__to__eip155_1__cbbtc/trades.csv",
+    "distributionCsv": "/home/alpinevm/Development/rift/historical-dex-comp/data/analytics/execution-quality/cowswap/eip155_1__eth__to__eip155_1__cbbtc/distribution.csv",
+    "summaryJson": "/home/alpinevm/Development/rift/historical-dex-comp/data/analytics/execution-quality/cowswap/eip155_1__eth__to__eip155_1__cbbtc/summary.json"
+  },
+  "pricingSource": {
+    "venue": "coinbase",
+    "endpoint": "GET /products/{product_id}/candles",
+    "granularitySeconds": 60,
+    "priceFieldUsed": "close",
+    "cacheDbPath": "/home/alpinevm/Development/rift/historical-dex-comp/data/analytics/coinbase-price-cache.sqlite",
+    "stablecoinPegMode": "off",
+    "stablecoinUsdPegSymbols": []
+  }
+}

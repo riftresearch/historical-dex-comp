@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-02-25T23:14:17.443Z",
+  "generatedAt": "2026-03-05T07:01:08.250Z",
   "provider": "lifi",
   "tokenPath": {
     "sourceChainCanonical": "eip155:1",
@@ -8,8 +8,8 @@
     "destinationTokenSymbol": "CBBTC"
   },
   "window": {
-    "startAtIso": "2026-01-01T00:00:00.000Z",
-    "endAtIso": "2026-02-25T23:59:59.000Z"
+    "startAtIso": "2026-02-03T06:54:54.000Z",
+    "endAtIso": "2026-03-05T06:54:54.000Z"
   },
   "notionalUsdFilter": {
     "min": null,
@@ -26,8 +26,8 @@
     "negativeBps": "output USD > input USD (better for user)"
   },
   "totals": {
-    "matchedTrades": 90,
-    "pricedTrades": 90,
+    "matchedTrades": 54,
+    "pricedTrades": 54,
     "skippedInvalidTimestamp": 0,
     "skippedMissingAmount": 0,
     "skippedNonPositiveAmount": 0,
@@ -36,52 +36,47 @@
     "pricedMatchRatePct": 100
   },
   "outcomeSummary": {
-    "betterTrades": 33,
-    "worseTrades": 57,
+    "betterTrades": 6,
+    "worseTrades": 48,
     "flatTrades": 0,
-    "betterRatePct": 36.6667,
-    "worseRatePct": 63.3333,
+    "betterRatePct": 11.1111,
+    "worseRatePct": 88.8889,
     "flatRatePct": 0
   },
   "bpsSummary": {
-    "count": 90,
-    "mean": 13.013336,
-    "median": 4.521112,
-    "stdDev": 85.123913,
-    "meanAbs": 45.446428,
+    "count": 54,
+    "mean": 24.659206,
+    "median": 34.29282,
+    "stdDev": 103.491335,
+    "meanAbs": 53.818578,
     "min": -477.202742,
-    "p10": -37.110931,
-    "p25": -3.413513,
-    "p50": 4.521112,
-    "p75": 38.973926,
-    "p90": 89.811695,
-    "p95": 115.596542,
-    "p99": 237.901377,
-    "iqr": 42.387439,
-    "max": 355.974638
+    "p10": -0.16047,
+    "p25": 8.107062,
+    "p50": 34.29282,
+    "p75": 40.795405,
+    "p90": 46.380783,
+    "p95": 97.702231,
+    "p99": 301.236443,
+    "iqr": 32.688343,
+    "max": 503.7076
   },
   "usdSummary": {
-    "totalInputUsd": 117549.77510019,
-    "totalOutputUsd": 117428.37308763,
-    "netUsdDelta": 121.40201256,
-    "weightedShortfallBps": 10.327711,
-    "meanInputUsd": 1306.10861222,
-    "medianInputUsd": 10.58988,
-    "meanOutputUsd": 1304.75970097,
-    "medianOutputUsd": 10.59383219,
-    "meanUsdDelta": 1.34891125,
-    "medianUsdDelta": 0.005025
+    "totalInputUsd": 55199.4681514,
+    "totalOutputUsd": 55076.41832438,
+    "netUsdDelta": 123.04982702,
+    "weightedShortfallBps": 22.29185,
+    "meanInputUsd": 1022.21237317,
+    "medianInputUsd": 5.88198,
+    "meanOutputUsd": 1019.93367267,
+    "medianOutputUsd": 5.85962028,
+    "meanUsdDelta": 2.2787005,
+    "medianUsdDelta": 0.02180125
   },
   "histogramBucketBps": 10,
   "distribution": [
     {
       "bucketStartBps": -480,
       "bucketEndBps": -470,
-      "count": 1
-    },
-    {
-      "bucketStartBps": -170,
-      "bucketEndBps": -160,
       "count": 1
     },
     {
@@ -95,44 +90,19 @@
       "count": 1
     },
     {
-      "bucketStartBps": -100,
-      "bucketEndBps": -90,
-      "count": 1
-    },
-    {
-      "bucketStartBps": -90,
-      "bucketEndBps": -80,
-      "count": 1
-    },
-    {
       "bucketStartBps": -80,
       "bucketEndBps": -70,
-      "count": 2
-    },
-    {
-      "bucketStartBps": -70,
-      "bucketEndBps": -60,
       "count": 1
-    },
-    {
-      "bucketStartBps": -40,
-      "bucketEndBps": -30,
-      "count": 1
-    },
-    {
-      "bucketStartBps": -30,
-      "bucketEndBps": -20,
-      "count": 3
     },
     {
       "bucketStartBps": -10,
       "bucketEndBps": 0,
-      "count": 20
+      "count": 2
     },
     {
       "bucketStartBps": 0,
       "bucketEndBps": 10,
-      "count": 22
+      "count": 9
     },
     {
       "bucketStartBps": 10,
@@ -142,61 +112,36 @@
     {
       "bucketStartBps": 20,
       "bucketEndBps": 30,
-      "count": 3
+      "count": 2
     },
     {
       "bucketStartBps": 30,
       "bucketEndBps": 40,
-      "count": 7
+      "count": 19
     },
     {
       "bucketStartBps": 40,
       "bucketEndBps": 50,
-      "count": 5
-    },
-    {
-      "bucketStartBps": 50,
-      "bucketEndBps": 60,
-      "count": 2
-    },
-    {
-      "bucketStartBps": 70,
-      "bucketEndBps": 80,
-      "count": 2
+      "count": 9
     },
     {
       "bucketStartBps": 80,
       "bucketEndBps": 90,
-      "count": 3
-    },
-    {
-      "bucketStartBps": 90,
-      "bucketEndBps": 100,
       "count": 2
     },
     {
       "bucketStartBps": 110,
       "bucketEndBps": 120,
-      "count": 3
-    },
-    {
-      "bucketStartBps": 130,
-      "bucketEndBps": 140,
       "count": 1
     },
     {
-      "bucketStartBps": 160,
-      "bucketEndBps": 170,
+      "bucketStartBps": 120,
+      "bucketEndBps": 130,
       "count": 1
     },
     {
-      "bucketStartBps": 220,
-      "bucketEndBps": 230,
-      "count": 1
-    },
-    {
-      "bucketStartBps": 350,
-      "bucketEndBps": 360,
+      "bucketStartBps": 500,
+      "bucketEndBps": 510,
       "count": 1
     }
   ],

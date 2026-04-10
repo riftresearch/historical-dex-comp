@@ -5,6 +5,7 @@ export const PROVIDER_KEYS = [
   "chainflip",
   "garden",
   "nearintents",
+  "cowswap",
   "kyberswap",
 ] as const;
 

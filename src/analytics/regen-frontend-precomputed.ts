@@ -40,11 +40,16 @@ const DEFAULT_DESTINATION_CHAIN = "bitcoin:mainnet";
 const DEFAULT_DESTINATION_TOKEN = "BTC";
 const DEFAULT_INCLUDE_REVERSE_PATHS = true;
 const DEFAULT_STABLECOIN_MODE: StablecoinPegMode = "usd_1";
-const CBBTC_EXTRA_PROVIDERS: readonly ProviderKey[] = ["kyberswap", "lifi", "relay"];
-const CBBTC_EXTRA_SOURCE_CHAIN = "eip155:1";
-const CBBTC_EXTRA_DESTINATION_CHAIN = "eip155:1";
+const CBBTC_EXTRA_PROVIDERS: readonly ProviderKey[] = ["kyberswap", "lifi", "relay", "cowswap"];
+const CBBTC_EXTRA_CHAINS = ["eip155:1", "eip155:8453"] as const;
 const CBBTC_EXTRA_DESTINATION_TOKEN = "CBBTC";
-const CBBTC_EXTRA_SOURCE_TOKENS = ["USDC", "USDT", "ETH", "WETH"] as const;
+const CBBTC_EXTRA_SOURCE_TOKENS = ["USDC", "USDT", "ETH"] as const;
+const ETH_USDC_EXTRA_PROVIDERS: readonly ProviderKey[] = ["kyberswap", "lifi", "relay", "cowswap"];
+const ETH_USDC_EXTRA_CHAINS = ["eip155:1", "eip155:8453"] as const;
+const ETH_USDC_EXTRA_PAIR_TASKS = [
+  { sourceToken: "USDC", destinationToken: "ETH" },
+  { sourceToken: "ETH", destinationToken: "USDC" },
+] as const;
 
 function parsePositiveInt(name: string, rawValue: string): number {
   const parsed = Number(rawValue);
@@ -107,7 +112,7 @@ function printUsage(): void {
   bun run src/analytics/regen-frontend-precomputed.ts [options]
 
 Options:
-  --providers <all|lifi,relay,thorchain,chainflip,garden,nearintents,kyberswap>
+  --providers <all|lifi,relay,thorchain,chainflip,garden,nearintents,cowswap,kyberswap>
   --source-tokens <CSV>                  (default: USDC,USDT,ETH)
   --source-chain <canonical-chain>       (default: eip155:1)
   --destination-chain <canonical-chain>  (default: bitcoin:mainnet)
@@ -120,8 +125,9 @@ Options:
   --stablecoin-peg-mode <off|usd_1>      (default: usd_1)
 
 Notes:
-  If kyberswap, lifi, and/or relay are included in --providers, this script
-  also precomputes eip155:1 paths for USDC/USDT/ETH/WETH -> CBBTC for those providers.
+  If kyberswap, lifi, relay, and/or cowswap are included in --providers, this script
+  also precomputes eip155:1 and eip155:8453 paths for USDC/USDT/ETH -> CBBTC.
+  It also precomputes eip155:1 and eip155:8453 paths for USDC -> ETH and ETH -> USDC.
 
 Example:
   bun run src/analytics/regen-frontend-precomputed.ts
@@ -447,14 +453,33 @@ async function run(): Promise<void> {
     if (!config.providers.includes(provider)) {
       continue;
     }
-    for (const sourceToken of CBBTC_EXTRA_SOURCE_TOKENS) {
-      pushTask({
-        provider,
-        sourceChainCanonical: CBBTC_EXTRA_SOURCE_CHAIN,
-        sourceToken,
-        destinationChainCanonical: CBBTC_EXTRA_DESTINATION_CHAIN,
-        destinationTokenSymbol: CBBTC_EXTRA_DESTINATION_TOKEN,
-      });
+    for (const chainCanonical of CBBTC_EXTRA_CHAINS) {
+      for (const sourceToken of CBBTC_EXTRA_SOURCE_TOKENS) {
+        pushTask({
+          provider,
+          sourceChainCanonical: chainCanonical,
+          sourceToken,
+          destinationChainCanonical: chainCanonical,
+          destinationTokenSymbol: CBBTC_EXTRA_DESTINATION_TOKEN,
+        });
+      }
+    }
+  }
+
+  for (const provider of ETH_USDC_EXTRA_PROVIDERS) {
+    if (!config.providers.includes(provider)) {
+      continue;
+    }
+    for (const chainCanonical of ETH_USDC_EXTRA_CHAINS) {
+      for (const pair of ETH_USDC_EXTRA_PAIR_TASKS) {
+        pushTask({
+          provider,
+          sourceChainCanonical: chainCanonical,
+          sourceToken: pair.sourceToken,
+          destinationChainCanonical: chainCanonical,
+          destinationTokenSymbol: pair.destinationToken,
+        });
+      }
     }
   }
 

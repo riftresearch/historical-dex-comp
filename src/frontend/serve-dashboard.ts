@@ -1,5 +1,7 @@
+import { mkdir, rename, rm } from "node:fs/promises";
 import { extname, join, normalize, resolve, sep } from "node:path";
 import { PROVIDER_KEYS, type ProviderKey } from "../domain/provider-key";
+import { getAnalyticsDataDir } from "../storage/data-paths";
 import { queryPrepared } from "../storage/duckdb-utils";
 import { openProviderDatabase, providerDatabaseExists } from "../storage/provider-db";
 
@@ -180,6 +182,13 @@ const MIME_BY_EXT: Record<string, string> = {
   ".svg": "image/svg+xml",
 };
 
+const ANALYTICS_DATA_DIR = getAnalyticsDataDir();
+const FRONTEND_SHORTFALL_SNAPSHOT_DIR = join(
+  ANALYTICS_DATA_DIR,
+  "frontend-snapshots",
+  "shortfall",
+);
+
 const BASE_CTE_SQL = `
 WITH base AS (
   SELECT
@@ -231,17 +240,19 @@ const SHORTFALL_BUCKET_COARSE_STEP_LOG10 = 0.5;
 const SHORTFALL_BUCKET_DENSE_STEP_LOG10 = 0.25;
 const SHORTFALL_BUCKET_DENSE_MIN_USD = 1_000;
 const SHORTFALL_BUCKET_DENSE_MAX_USD = 100_000;
-const SHORTFALL_MIN_SAMPLE_COUNT = 10;
+const SHORTFALL_MIN_SAMPLE_COUNT = 3;
+const SHORTFALL_MAX_PROVIDER_END_AT_SKEW_MS = 6 * 60 * 60 * 1_000;
 const USD_BUCKET_COMPACT_FORMATTER = new Intl.NumberFormat("en-US", {
   notation: "compact",
   maximumFractionDigits: 1,
 });
-const DEFAULT_SHORTFALL_VIEW_ID = "usdc_eth_to_btc_bitcoin_all";
-const CBBTC_PATH_PROVIDERS: ProviderKey[] = ["kyberswap", "lifi", "relay"];
+const DEFAULT_SHORTFALL_VIEW_ID = "usdc_base_to_cbbtc_base_all_kyberswap";
+const CBBTC_PATH_PROVIDERS: ProviderKey[] = ["kyberswap", "lifi", "relay", "cowswap"];
+const ETH_USDC_PATH_PROVIDERS: ProviderKey[] = ["kyberswap", "lifi", "relay", "cowswap"];
 const SHORTFALL_VIEW_CONFIGS: Record<string, ShortfallViewConfig> = {
   usdc_eth_to_btc_bitcoin_all: {
     id: "usdc_eth_to_btc_bitcoin_all",
-    label: "USDC/ethereum -> BTC/bitcoin",
+    label: "ethereum.USDC -> bitcoin.BTC",
     days: AGGREGATION_WINDOW_DAYS,
     tokenPath: {
       sourceChainCanonical: "eip155:1",
@@ -258,7 +269,7 @@ const SHORTFALL_VIEW_CONFIGS: Record<string, ShortfallViewConfig> = {
   },
   usdt_eth_to_btc_bitcoin_all: {
     id: "usdt_eth_to_btc_bitcoin_all",
-    label: "USDT/ethereum -> BTC/bitcoin",
+    label: "ethereum.USDT -> bitcoin.BTC",
     days: AGGREGATION_WINDOW_DAYS,
     tokenPath: {
       sourceChainCanonical: "eip155:1",
@@ -275,7 +286,7 @@ const SHORTFALL_VIEW_CONFIGS: Record<string, ShortfallViewConfig> = {
   },
   eth_eth_to_btc_bitcoin_all: {
     id: "eth_eth_to_btc_bitcoin_all",
-    label: "ETH/ethereum -> BTC/bitcoin",
+    label: "ethereum.ETH -> bitcoin.BTC",
     days: AGGREGATION_WINDOW_DAYS,
     tokenPath: {
       sourceChainCanonical: "eip155:1",
@@ -292,7 +303,7 @@ const SHORTFALL_VIEW_CONFIGS: Record<string, ShortfallViewConfig> = {
   },
   btc_bitcoin_to_usdc_eth_all: {
     id: "btc_bitcoin_to_usdc_eth_all",
-    label: "BTC/bitcoin -> USDC/ethereum",
+    label: "bitcoin.BTC -> ethereum.USDC",
     days: AGGREGATION_WINDOW_DAYS,
     tokenPath: {
       sourceChainCanonical: "bitcoin:mainnet",
@@ -309,7 +320,7 @@ const SHORTFALL_VIEW_CONFIGS: Record<string, ShortfallViewConfig> = {
   },
   btc_bitcoin_to_usdt_eth_all: {
     id: "btc_bitcoin_to_usdt_eth_all",
-    label: "BTC/bitcoin -> USDT/ethereum",
+    label: "bitcoin.BTC -> ethereum.USDT",
     days: AGGREGATION_WINDOW_DAYS,
     tokenPath: {
       sourceChainCanonical: "bitcoin:mainnet",
@@ -326,7 +337,7 @@ const SHORTFALL_VIEW_CONFIGS: Record<string, ShortfallViewConfig> = {
   },
   btc_bitcoin_to_eth_eth_all: {
     id: "btc_bitcoin_to_eth_eth_all",
-    label: "BTC/bitcoin -> ETH/ethereum",
+    label: "bitcoin.BTC -> ethereum.ETH",
     days: AGGREGATION_WINDOW_DAYS,
     tokenPath: {
       sourceChainCanonical: "bitcoin:mainnet",
@@ -343,7 +354,7 @@ const SHORTFALL_VIEW_CONFIGS: Record<string, ShortfallViewConfig> = {
   },
   usdc_eth_to_cbbtc_eth_all_kyberswap: {
     id: "usdc_eth_to_cbbtc_eth_all_kyberswap",
-    label: "USDC/ethereum -> CBBTC/ethereum (KyberSwap+LI.FI+Relay)",
+    label: "ethereum.USDC -> ethereum.CBBTC",
     days: AGGREGATION_WINDOW_DAYS,
     tokenPath: {
       sourceChainCanonical: "eip155:1",
@@ -361,7 +372,7 @@ const SHORTFALL_VIEW_CONFIGS: Record<string, ShortfallViewConfig> = {
   },
   eth_eth_to_cbbtc_eth_all_kyberswap: {
     id: "eth_eth_to_cbbtc_eth_all_kyberswap",
-    label: "ETH/ethereum -> CBBTC/ethereum (KyberSwap+LI.FI+Relay)",
+    label: "ethereum.ETH -> ethereum.CBBTC",
     days: AGGREGATION_WINDOW_DAYS,
     tokenPath: {
       sourceChainCanonical: "eip155:1",
@@ -379,7 +390,7 @@ const SHORTFALL_VIEW_CONFIGS: Record<string, ShortfallViewConfig> = {
   },
   usdt_eth_to_cbbtc_eth_all_kyberswap: {
     id: "usdt_eth_to_cbbtc_eth_all_kyberswap",
-    label: "USDT/ethereum -> CBBTC/ethereum (KyberSwap+LI.FI+Relay)",
+    label: "ethereum.USDT -> ethereum.CBBTC",
     days: AGGREGATION_WINDOW_DAYS,
     tokenPath: {
       sourceChainCanonical: "eip155:1",
@@ -395,14 +406,14 @@ const SHORTFALL_VIEW_CONFIGS: Record<string, ShortfallViewConfig> = {
     },
     providers: CBBTC_PATH_PROVIDERS,
   },
-  weth_eth_to_cbbtc_eth_all_kyberswap: {
-    id: "weth_eth_to_cbbtc_eth_all_kyberswap",
-    label: "WETH/ethereum -> CBBTC/ethereum (KyberSwap+LI.FI+Relay)",
+  usdc_base_to_cbbtc_base_all_kyberswap: {
+    id: "usdc_base_to_cbbtc_base_all_kyberswap",
+    label: "base.USDC -> base.CBBTC",
     days: AGGREGATION_WINDOW_DAYS,
     tokenPath: {
-      sourceChainCanonical: "eip155:1",
-      sourceTokenSymbol: "WETH",
-      destinationChainCanonical: "eip155:1",
+      sourceChainCanonical: "eip155:8453",
+      sourceTokenSymbol: "USDC",
+      destinationChainCanonical: "eip155:8453",
       destinationTokenSymbol: "CBBTC",
     },
     notionalUsdFilter: {
@@ -412,6 +423,114 @@ const SHORTFALL_VIEW_CONFIGS: Record<string, ShortfallViewConfig> = {
       maxInclusive: false,
     },
     providers: CBBTC_PATH_PROVIDERS,
+  },
+  eth_base_to_cbbtc_base_all_kyberswap: {
+    id: "eth_base_to_cbbtc_base_all_kyberswap",
+    label: "base.ETH -> base.CBBTC",
+    days: AGGREGATION_WINDOW_DAYS,
+    tokenPath: {
+      sourceChainCanonical: "eip155:8453",
+      sourceTokenSymbol: "ETH",
+      destinationChainCanonical: "eip155:8453",
+      destinationTokenSymbol: "CBBTC",
+    },
+    notionalUsdFilter: {
+      min: null,
+      max: null,
+      minInclusive: false,
+      maxInclusive: false,
+    },
+    providers: CBBTC_PATH_PROVIDERS,
+  },
+  usdt_base_to_cbbtc_base_all_kyberswap: {
+    id: "usdt_base_to_cbbtc_base_all_kyberswap",
+    label: "base.USDT -> base.CBBTC",
+    days: AGGREGATION_WINDOW_DAYS,
+    tokenPath: {
+      sourceChainCanonical: "eip155:8453",
+      sourceTokenSymbol: "USDT",
+      destinationChainCanonical: "eip155:8453",
+      destinationTokenSymbol: "CBBTC",
+    },
+    notionalUsdFilter: {
+      min: null,
+      max: null,
+      minInclusive: false,
+      maxInclusive: false,
+    },
+    providers: CBBTC_PATH_PROVIDERS,
+  },
+  usdc_eth_to_eth_eth_all: {
+    id: "usdc_eth_to_eth_eth_all",
+    label: "ethereum.USDC -> ethereum.ETH",
+    days: AGGREGATION_WINDOW_DAYS,
+    tokenPath: {
+      sourceChainCanonical: "eip155:1",
+      sourceTokenSymbol: "USDC",
+      destinationChainCanonical: "eip155:1",
+      destinationTokenSymbol: "ETH",
+    },
+    notionalUsdFilter: {
+      min: null,
+      max: null,
+      minInclusive: false,
+      maxInclusive: false,
+    },
+    providers: ETH_USDC_PATH_PROVIDERS,
+  },
+  eth_eth_to_usdc_eth_all: {
+    id: "eth_eth_to_usdc_eth_all",
+    label: "ethereum.ETH -> ethereum.USDC",
+    days: AGGREGATION_WINDOW_DAYS,
+    tokenPath: {
+      sourceChainCanonical: "eip155:1",
+      sourceTokenSymbol: "ETH",
+      destinationChainCanonical: "eip155:1",
+      destinationTokenSymbol: "USDC",
+    },
+    notionalUsdFilter: {
+      min: null,
+      max: null,
+      minInclusive: false,
+      maxInclusive: false,
+    },
+    providers: ETH_USDC_PATH_PROVIDERS,
+  },
+  usdc_base_to_eth_base_all: {
+    id: "usdc_base_to_eth_base_all",
+    label: "base.USDC -> base.ETH",
+    days: AGGREGATION_WINDOW_DAYS,
+    tokenPath: {
+      sourceChainCanonical: "eip155:8453",
+      sourceTokenSymbol: "USDC",
+      destinationChainCanonical: "eip155:8453",
+      destinationTokenSymbol: "ETH",
+    },
+    notionalUsdFilter: {
+      min: null,
+      max: null,
+      minInclusive: false,
+      maxInclusive: false,
+    },
+    providers: ETH_USDC_PATH_PROVIDERS,
+  },
+  eth_base_to_usdc_base_all: {
+    id: "eth_base_to_usdc_base_all",
+    label: "base.ETH -> base.USDC",
+    days: AGGREGATION_WINDOW_DAYS,
+    tokenPath: {
+      sourceChainCanonical: "eip155:8453",
+      sourceTokenSymbol: "ETH",
+      destinationChainCanonical: "eip155:8453",
+      destinationTokenSymbol: "USDC",
+    },
+    notionalUsdFilter: {
+      min: null,
+      max: null,
+      minInclusive: false,
+      maxInclusive: false,
+    },
+    providers: ETH_USDC_PATH_PROVIDERS,
   },
 };
 
@@ -466,13 +585,18 @@ function parseDays(rawValue: string | null, fallback: number): number {
   return Math.min(parsed, 365);
 }
 
-function resolveShortfallView(rawValue: string | null): ShortfallViewConfig {
-  if (rawValue) {
-    const normalized = rawValue.trim();
-    if (normalized && SHORTFALL_VIEW_CONFIGS[normalized]) {
-      return SHORTFALL_VIEW_CONFIGS[normalized];
-    }
+function findShortfallView(rawValue: string | null): ShortfallViewConfig | null {
+  if (!rawValue) {
+    return null;
   }
+  const normalized = rawValue.trim();
+  if (!normalized) {
+    return null;
+  }
+  return SHORTFALL_VIEW_CONFIGS[normalized] ?? null;
+}
+
+function getDefaultShortfallView(): ShortfallViewConfig {
   const fallback = SHORTFALL_VIEW_CONFIGS[DEFAULT_SHORTFALL_VIEW_ID];
   if (fallback) {
     return fallback;
@@ -509,6 +633,18 @@ function buildShortfallPathKey(path: ShortfallTokenPath): string {
     sanitizeSegment(path.destinationChainCanonical),
     sanitizeSegment(path.destinationTokenSymbol),
   ].join("__");
+}
+
+function getPrecomputedShortfallSnapshotPath(viewId: string): string {
+  return join(FRONTEND_SHORTFALL_SNAPSHOT_DIR, `${sanitizeSegment(viewId)}.json`);
+}
+
+async function readPrecomputedShortfallSnapshot(viewId: string): Promise<ShortfallSnapshot | null> {
+  const file = Bun.file(getPrecomputedShortfallSnapshotPath(viewId));
+  if (!(await file.exists())) {
+    return null;
+  }
+  return (await file.json()) as ShortfallSnapshot;
 }
 
 interface ShortfallProviderSourceData {
@@ -829,9 +965,7 @@ async function getShortfallProviderSourceData(
   notionalFilter: ShortfallNotionalFilterConfig,
 ): Promise<ShortfallProviderSourceData> {
   const providerPath = join(
-    process.cwd(),
-    "data",
-    "analytics",
+    ANALYTICS_DATA_DIR,
     "execution-quality",
     providerKey,
     buildShortfallPathKey(tokenPath),
@@ -981,6 +1115,32 @@ function toProviderSnapshot(
   };
 }
 
+function toTimestampMs(value: string | null): number | null {
+  if (!value) {
+    return null;
+  }
+  const parsed = Date.parse(value);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function isFreshShortfallProviderSource(
+  source: ShortfallProviderSourceData,
+  latestEndAtMs: number | null,
+  nowMs: number,
+): boolean {
+  const analyzedRangeEndAtMs = toTimestampMs(source.analyzedRangeEndAt);
+  if (analyzedRangeEndAtMs === null) {
+    return false;
+  }
+  if (latestEndAtMs !== null && latestEndAtMs - analyzedRangeEndAtMs > SHORTFALL_MAX_PROVIDER_END_AT_SKEW_MS) {
+    return false;
+  }
+  if (nowMs - analyzedRangeEndAtMs > SHORTFALL_MAX_PROVIDER_END_AT_SKEW_MS) {
+    return false;
+  }
+  return true;
+}
+
 async function buildShortfallSnapshot(view: ShortfallViewConfig): Promise<ShortfallSnapshot> {
   const bucketConfig: ShortfallBucketConfig = {
     axisScale: "log10",
@@ -997,20 +1157,34 @@ async function buildShortfallSnapshot(view: ShortfallViewConfig): Promise<Shortf
       getShortfallProviderSourceData(providerKey, view.tokenPath, view.notionalUsdFilter),
     ),
   );
+  const latestEndAtMs = providerSources.reduce<number | null>((latest, source) => {
+    const analyzedRangeEndAtMs = toTimestampMs(source.analyzedRangeEndAt);
+    if (analyzedRangeEndAtMs === null) {
+      return latest;
+    }
+    if (latest === null || analyzedRangeEndAtMs > latest) {
+      return analyzedRangeEndAtMs;
+    }
+    return latest;
+  }, null);
+  const nowMs = Date.now();
+  const freshProviderSources = providerSources.filter((source) =>
+    isFreshShortfallProviderSource(source, latestEndAtMs, nowMs),
+  );
 
-  const allInputUsd = providerSources.flatMap((provider) =>
+  const allInputUsd = freshProviderSources.flatMap((provider) =>
     provider.trades.map((trade) => trade.inputUsd),
   );
   const buckets = buildNotionalBuckets(allInputUsd, bucketConfig.stepLog10);
   const sampleCounts = buildBucketSampleCounts(
-    providerSources.map((provider) => provider.trades),
+    freshProviderSources.map((provider) => provider.trades),
     buckets,
   );
   for (const bucket of buckets) {
     bucket.sampleCount = sampleCounts[bucket.bucketIndex] ?? 0;
   }
 
-  const providers = providerSources.map((source) =>
+  const providers = freshProviderSources.map((source) =>
     toProviderSnapshot(source, buckets, bucketConfig.minSampleCount),
   );
 
@@ -1024,6 +1198,24 @@ async function buildShortfallSnapshot(view: ShortfallViewConfig): Promise<Shortf
     bucketConfig,
     buckets,
     providers,
+  };
+}
+
+export async function writePrecomputedShortfallSnapshots(): Promise<{ viewCount: number }> {
+  const views = Object.values(SHORTFALL_VIEW_CONFIGS);
+  await mkdir(FRONTEND_SHORTFALL_SNAPSHOT_DIR, { recursive: true });
+
+  for (const view of views) {
+    const snapshot = await buildShortfallSnapshot(view);
+    const filePath = getPrecomputedShortfallSnapshotPath(view.id);
+    const tempPath = `${filePath}.tmp-${Date.now()}-${crypto.randomUUID()}`;
+    await Bun.write(tempPath, `${JSON.stringify(snapshot, null, 2)}\n`);
+    await rename(tempPath, filePath);
+    await rm(tempPath, { force: true });
+  }
+
+  return {
+    viewCount: views.length,
   };
 }
 
@@ -1191,8 +1383,25 @@ export async function startDashboardServer(
         });
       }
       if (url.pathname === "/api/shortfall-distribution") {
-        const shortfallView = resolveShortfallView(url.searchParams.get("view"));
-        const snapshot = await buildShortfallSnapshot(shortfallView);
+        const requestedViewId = url.searchParams.get("view");
+        const shortfallView = findShortfallView(requestedViewId) ?? getDefaultShortfallView();
+        if (requestedViewId && !findShortfallView(requestedViewId)) {
+          return Response.json(
+            {
+              error: `Unknown shortfall view '${requestedViewId}'.`,
+              defaultViewId: getDefaultShortfallView().id,
+            },
+            {
+              status: 400,
+              headers: {
+                "Cache-Control": "no-store",
+              },
+            },
+          );
+        }
+        const snapshot =
+          (await readPrecomputedShortfallSnapshot(shortfallView.id)) ??
+          (await buildShortfallSnapshot(shortfallView));
         return Response.json(snapshot, {
           headers: {
             "Cache-Control": "no-store",

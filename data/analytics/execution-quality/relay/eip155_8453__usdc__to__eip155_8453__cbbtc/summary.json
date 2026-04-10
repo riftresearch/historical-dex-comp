@@ -1,0 +1,118 @@
+{
+  "generatedAt": "2026-04-08T17:29:19.361Z",
+  "provider": "relay",
+  "tokenPath": {
+    "sourceChainCanonical": "eip155:8453",
+    "sourceTokenSymbol": "USDC",
+    "destinationChainCanonical": "eip155:8453",
+    "destinationTokenSymbol": "CBBTC"
+  },
+  "window": {
+    "startAtIso": "2026-03-09T17:26:00.000Z",
+    "endAtIso": "2026-04-08T17:26:00.000Z"
+  },
+  "notionalUsdFilter": {
+    "min": null,
+    "max": null,
+    "minInclusive": false,
+    "maxInclusive": false,
+    "minExclusive": null,
+    "maxExclusive": null,
+    "minInclusiveValue": null,
+    "maxInclusiveValue": null
+  },
+  "signConvention": {
+    "positiveBps": "output USD < input USD (worse for user)",
+    "negativeBps": "output USD > input USD (better for user)"
+  },
+  "totals": {
+    "matchedTrades": 4,
+    "pricedTrades": 4,
+    "skippedInvalidTimestamp": 0,
+    "skippedMissingAmount": 0,
+    "skippedNonPositiveAmount": 0,
+    "skippedMissingPrice": 0,
+    "skippedOutsideNotionalBand": 0,
+    "pricedMatchRatePct": 100
+  },
+  "outcomeSummary": {
+    "betterTrades": 1,
+    "worseTrades": 3,
+    "flatTrades": 0,
+    "betterRatePct": 25,
+    "worseRatePct": 75,
+    "flatRatePct": 0
+  },
+  "bpsSummary": {
+    "count": 4,
+    "mean": 5.750502,
+    "median": 5.510266,
+    "stdDev": 8.958759,
+    "meanAbs": 8.210482,
+    "min": -4.91996,
+    "p10": -2.123646,
+    "p25": 2.070826,
+    "p50": 5.510266,
+    "p75": 9.189942,
+    "p90": 13.816839,
+    "p95": 15.359138,
+    "p99": 16.592977,
+    "iqr": 7.119116,
+    "max": 16.901437
+  },
+  "usdSummary": {
+    "totalInputUsd": 6362.070122,
+    "totalOutputUsd": 6353.37546271,
+    "netUsdDelta": 8.69465929,
+    "weightedShortfallBps": 13.6664,
+    "meanInputUsd": 1590.5175305,
+    "medianInputUsd": 1000.440061,
+    "meanOutputUsd": 1588.34386568,
+    "medianOutputUsd": 999.77792295,
+    "meanUsdDelta": 2.17366482,
+    "medianUsdDelta": 0.66213806
+  },
+  "histogramBucketBps": 10,
+  "distribution": [
+    {
+      "bucketStartBps": -10,
+      "bucketEndBps": 0,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 0,
+      "bucketEndBps": 10,
+      "count": 2
+    },
+    {
+      "bucketStartBps": 10,
+      "bucketEndBps": 20,
+      "count": 1
+    }
+  ],
+  "output": {
+    "directory": "/home/alpinevm/Development/rift/historical-dex-comp/data/analytics/execution-quality/relay/eip155_8453__usdc__to__eip155_8453__cbbtc",
+    "tradesCsv": "/home/alpinevm/Development/rift/historical-dex-comp/data/analytics/execution-quality/relay/eip155_8453__usdc__to__eip155_8453__cbbtc/trades.csv",
+    "distributionCsv": "/home/alpinevm/Development/rift/historical-dex-comp/data/analytics/execution-quality/relay/eip155_8453__usdc__to__eip155_8453__cbbtc/distribution.csv",
+    "summaryJson": "/home/alpinevm/Development/rift/historical-dex-comp/data/analytics/execution-quality/relay/eip155_8453__usdc__to__eip155_8453__cbbtc/summary.json"
+  },
+  "pricingSource": {
+    "venue": "coinbase",
+    "endpoint": "GET /products/{product_id}/candles",
+    "granularitySeconds": 60,
+    "priceFieldUsed": "close",
+    "cacheDbPath": "/home/alpinevm/Development/rift/historical-dex-comp/data/analytics/coinbase-price-cache.sqlite",
+    "stablecoinPegMode": "usd_1",
+    "stablecoinUsdPegSymbols": [
+      "DAI",
+      "FRAX",
+      "PYUSD",
+      "USDC",
+      "USDC.E",
+      "USDCE",
+      "USDE",
+      "USDT",
+      "USDT0"
+    ]
+  }
+}

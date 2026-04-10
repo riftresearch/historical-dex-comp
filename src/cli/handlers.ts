@@ -1,4 +1,9 @@
 import { isProviderKey, PROVIDER_KEYS } from "../domain/provider-key";
+import {
+  initializeDashboardRuntimeDataFromEnv,
+  startDashboardAutoRefreshFromEnv,
+  warmPrecomputedShortfallSnapshots,
+} from "../frontend/dashboard-refresh";
 import { startDashboardServer } from "../frontend/serve-dashboard";
 import { migrateProviders } from "../storage/migrate";
 import { runProviderIngest } from "../ingest/run-provider-ingest";
@@ -187,7 +192,10 @@ export async function handleIntegrity(args: string[]): Promise<void> {
 
 export async function handleDashboard(args: string[]): Promise<void> {
   const options = parseDashboardOptions(args);
+  await initializeDashboardRuntimeDataFromEnv();
+  await warmPrecomputedShortfallSnapshots();
   const server = await startDashboardServer(options);
+  startDashboardAutoRefreshFromEnv();
   console.log(
     JSON.stringify(
       {

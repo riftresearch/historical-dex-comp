@@ -18,6 +18,8 @@ const CHAIN_ALIAS_BY_PROVIDER: Partial<
   lifi: {
     ethereum: "eip155:1",
     "1": "eip155:1",
+    base: "eip155:8453",
+    "8453": "eip155:8453",
   },
   relay: {
     bitcoin: "bitcoin:mainnet",
@@ -102,6 +104,14 @@ const CHAIN_ALIAS_BY_PROVIDER: Partial<
   kyberswap: {
     ethereum: "eip155:1",
     "1": "eip155:1",
+    base: "eip155:8453",
+    "8453": "eip155:8453",
+  },
+  cowswap: {
+    ethereum: "eip155:1",
+    "1": "eip155:1",
+    base: "eip155:8453",
+    "8453": "eip155:8453",
   },
 };
 

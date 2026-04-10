@@ -1,0 +1,108 @@
+{
+  "generatedAt": "2026-04-10T18:56:34.005Z",
+  "provider": "cowswap",
+  "tokenPath": {
+    "sourceChainCanonical": "eip155:1",
+    "sourceTokenSymbol": "ETH",
+    "destinationChainCanonical": "eip155:1",
+    "destinationTokenSymbol": "USDC"
+  },
+  "window": {
+    "startAtIso": "2026-04-01T00:00:00.000Z",
+    "endAtIso": "2026-04-10T00:00:00.000Z"
+  },
+  "notionalUsdFilter": {
+    "min": null,
+    "max": null,
+    "minInclusive": false,
+    "maxInclusive": false,
+    "minExclusive": null,
+    "maxExclusive": null,
+    "minInclusiveValue": null,
+    "maxInclusiveValue": null
+  },
+  "signConvention": {
+    "positiveBps": "output USD < input USD (worse for user)",
+    "negativeBps": "output USD > input USD (better for user)"
+  },
+  "totals": {
+    "matchedTrades": 5,
+    "pricedTrades": 5,
+    "skippedInvalidTimestamp": 0,
+    "skippedMissingAmount": 0,
+    "skippedNonPositiveAmount": 0,
+    "skippedMissingPrice": 0,
+    "skippedOutsideNotionalBand": 0,
+    "pricedMatchRatePct": 100
+  },
+  "outcomeSummary": {
+    "betterTrades": 0,
+    "worseTrades": 5,
+    "flatTrades": 0,
+    "betterRatePct": 0,
+    "worseRatePct": 100,
+    "flatRatePct": 0
+  },
+  "bpsSummary": {
+    "count": 5,
+    "mean": 15.269714,
+    "median": 10.598205,
+    "stdDev": 13.653595,
+    "meanAbs": 15.269714,
+    "min": 4.554504,
+    "p10": 6.135772,
+    "p25": 8.507675,
+    "p50": 10.598205,
+    "p75": 13.73388,
+    "p90": 28.866136,
+    "p95": 33.910221,
+    "p99": 37.945489,
+    "iqr": 5.226205,
+    "max": 38.954306
+  },
+  "usdSummary": {
+    "totalInputUsd": 136403.31422942,
+    "totalOutputUsd": 136144.79144897,
+    "netUsdDelta": 258.52278045,
+    "weightedShortfallBps": 18.952823,
+    "meanInputUsd": 27280.66284588,
+    "medianInputUsd": 42020,
+    "meanOutputUsd": 27228.95828979,
+    "medianOutputUsd": 41975.46634109,
+    "meanUsdDelta": 51.70455609,
+    "medianUsdDelta": 19.14531343
+  },
+  "histogramBucketBps": 10,
+  "distribution": [
+    {
+      "bucketStartBps": 0,
+      "bucketEndBps": 10,
+      "count": 2
+    },
+    {
+      "bucketStartBps": 10,
+      "bucketEndBps": 20,
+      "count": 2
+    },
+    {
+      "bucketStartBps": 30,
+      "bucketEndBps": 40,
+      "count": 1
+    }
+  ],
+  "output": {
+    "directory": "/home/alpinevm/Development/rift/historical-dex-comp/data/analytics/execution-quality/cowswap/eip155_1__eth__to__eip155_1__usdc",
+    "tradesCsv": "/home/alpinevm/Development/rift/historical-dex-comp/data/analytics/execution-quality/cowswap/eip155_1__eth__to__eip155_1__usdc/trades.csv",
+    "distributionCsv": "/home/alpinevm/Development/rift/historical-dex-comp/data/analytics/execution-quality/cowswap/eip155_1__eth__to__eip155_1__usdc/distribution.csv",
+    "summaryJson": "/home/alpinevm/Development/rift/historical-dex-comp/data/analytics/execution-quality/cowswap/eip155_1__eth__to__eip155_1__usdc/summary.json"
+  },
+  "pricingSource": {
+    "venue": "coinbase",
+    "endpoint": "GET /products/{product_id}/candles",
+    "granularitySeconds": 60,
+    "priceFieldUsed": "close",
+    "cacheDbPath": "/home/alpinevm/Development/rift/historical-dex-comp/data/analytics/coinbase-price-cache.sqlite",
+    "stablecoinPegMode": "off",
+    "stablecoinUsdPegSymbols": []
+  }
+}

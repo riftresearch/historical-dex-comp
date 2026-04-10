@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-02-25T23:13:48.644Z",
+  "generatedAt": "2026-03-05T06:59:09.786Z",
   "provider": "kyberswap",
   "tokenPath": {
     "sourceChainCanonical": "eip155:1",
@@ -8,8 +8,8 @@
     "destinationTokenSymbol": "CBBTC"
   },
   "window": {
-    "startAtIso": "2026-01-01T00:00:00.000Z",
-    "endAtIso": "2026-02-25T23:59:59.000Z"
+    "startAtIso": "2026-02-03T06:54:54.000Z",
+    "endAtIso": "2026-03-05T06:54:54.000Z"
   },
   "notionalUsdFilter": {
     "min": null,
@@ -26,8 +26,8 @@
     "negativeBps": "output USD > input USD (better for user)"
   },
   "totals": {
-    "matchedTrades": 169,
-    "pricedTrades": 169,
+    "matchedTrades": 92,
+    "pricedTrades": 92,
     "skippedInvalidTimestamp": 0,
     "skippedMissingAmount": 0,
     "skippedNonPositiveAmount": 0,
@@ -36,69 +36,44 @@
     "pricedMatchRatePct": 100
   },
   "outcomeSummary": {
-    "betterTrades": 48,
-    "worseTrades": 121,
+    "betterTrades": 27,
+    "worseTrades": 65,
     "flatTrades": 0,
-    "betterRatePct": 28.4024,
-    "worseRatePct": 71.5976,
+    "betterRatePct": 29.3478,
+    "worseRatePct": 70.6522,
     "flatRatePct": 0
   },
   "bpsSummary": {
-    "count": 169,
-    "mean": 0.864103,
-    "median": 3.948101,
-    "stdDev": 21.37077,
-    "meanAbs": 11.591758,
-    "min": -145.343867,
-    "p10": -12.08731,
-    "p25": -1.509005,
-    "p50": 3.948101,
-    "p75": 9.894951,
-    "p90": 12.621287,
-    "p95": 19.30089,
-    "p99": 38.226752,
-    "iqr": 11.403956,
+    "count": 92,
+    "mean": 5.094827,
+    "median": 6.636973,
+    "stdDev": 12.307987,
+    "meanAbs": 10.218423,
+    "min": -28.572063,
+    "p10": -10.768852,
+    "p25": -4.109419,
+    "p50": 6.636973,
+    "p75": 10.915175,
+    "p90": 16.142906,
+    "p95": 29.494073,
+    "p99": 39.893634,
+    "iqr": 15.024594,
     "max": 39.893634
   },
   "usdSummary": {
-    "totalInputUsd": 231934.67698413,
-    "totalOutputUsd": 231600.91803066,
-    "netUsdDelta": 333.75895347,
-    "weightedShortfallBps": 14.390214,
-    "meanInputUsd": 1372.39453837,
-    "medianInputUsd": 4.639005,
-    "meanOutputUsd": 1370.41963332,
-    "medianOutputUsd": 4.65500489,
-    "meanUsdDelta": 1.97490505,
-    "medianUsdDelta": 0.00251109
+    "totalInputUsd": 206116.62110909,
+    "totalOutputUsd": 205873.28336536,
+    "netUsdDelta": 243.33774373,
+    "weightedShortfallBps": 11.805828,
+    "meanInputUsd": 2240.39805553,
+    "medianInputUsd": 6.85002,
+    "meanOutputUsd": 2237.75308006,
+    "medianOutputUsd": 6.85283496,
+    "meanUsdDelta": 2.64497548,
+    "medianUsdDelta": 0.00686959
   },
   "histogramBucketBps": 10,
   "distribution": [
-    {
-      "bucketStartBps": -150,
-      "bucketEndBps": -140,
-      "count": 1
-    },
-    {
-      "bucketStartBps": -130,
-      "bucketEndBps": -120,
-      "count": 1
-    },
-    {
-      "bucketStartBps": -70,
-      "bucketEndBps": -60,
-      "count": 2
-    },
-    {
-      "bucketStartBps": -60,
-      "bucketEndBps": -50,
-      "count": 3
-    },
-    {
-      "bucketStartBps": -50,
-      "bucketEndBps": -40,
-      "count": 1
-    },
     {
       "bucketStartBps": -30,
       "bucketEndBps": -20,
@@ -107,27 +82,27 @@
     {
       "bucketStartBps": -20,
       "bucketEndBps": -10,
-      "count": 10
+      "count": 8
     },
     {
       "bucketStartBps": -10,
       "bucketEndBps": 0,
-      "count": 28
+      "count": 17
     },
     {
       "bucketStartBps": 0,
       "bucketEndBps": 10,
-      "count": 80
+      "count": 34
     },
     {
       "bucketStartBps": 10,
       "bucketEndBps": 20,
-      "count": 33
+      "count": 24
     },
     {
       "bucketStartBps": 20,
       "bucketEndBps": 30,
-      "count": 5
+      "count": 4
     },
     {
       "bucketStartBps": 30,

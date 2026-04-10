@@ -2,8 +2,7 @@ import { access, mkdir } from "node:fs/promises";
 import { join } from "node:path";
 import { DuckDBInstance, type DuckDBConnection } from "@duckdb/node-api";
 import type { ProviderKey } from "../domain/provider-key";
-
-const PROVIDER_DATA_DIR = join(process.cwd(), "data", "providers");
+import { getProviderDataDir } from "./data-paths";
 
 export interface ProviderDatabaseHandle {
   filePath: string;
@@ -12,7 +11,7 @@ export interface ProviderDatabaseHandle {
 }
 
 export function getProviderDbPath(providerKey: ProviderKey): string {
-  return join(PROVIDER_DATA_DIR, `${providerKey}.duckdb`);
+  return join(getProviderDataDir(), `${providerKey}.duckdb`);
 }
 
 export async function providerDatabaseExists(providerKey: ProviderKey): Promise<boolean> {
@@ -28,7 +27,7 @@ export async function providerDatabaseExists(providerKey: ProviderKey): Promise<
 export async function openProviderDatabase(
   providerKey: ProviderKey,
 ): Promise<ProviderDatabaseHandle> {
-  await mkdir(PROVIDER_DATA_DIR, { recursive: true });
+  await mkdir(getProviderDataDir(), { recursive: true });
 
   const filePath = getProviderDbPath(providerKey);
   const instance = await DuckDBInstance.create(filePath);

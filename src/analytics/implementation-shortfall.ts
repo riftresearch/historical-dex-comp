@@ -3,6 +3,7 @@ import { dirname, join } from "node:path";
 import type { DuckDBConnection } from "@duckdb/node-api";
 import { Database } from "bun:sqlite";
 import { isProviderKey, type ProviderKey } from "../domain/provider-key";
+import { getAnalyticsDataDir } from "../storage/data-paths";
 import { queryPrepared } from "../storage/duckdb-utils";
 import { openProviderDatabase } from "../storage/provider-db";
 
@@ -97,13 +98,9 @@ interface AnalysisStats {
 }
 
 const COINBASE_API_BASE = "https://api.exchange.coinbase.com";
-const PRICE_CACHE_DB_PATH = join(
-  process.cwd(),
-  "data",
-  "analytics",
-  "coinbase-price-cache.sqlite",
-);
-const OUTPUT_ROOT_DIR = join(process.cwd(), "data", "analytics", "execution-quality");
+const ANALYTICS_DATA_DIR = getAnalyticsDataDir();
+const PRICE_CACHE_DB_PATH = join(ANALYTICS_DATA_DIR, "coinbase-price-cache.sqlite");
+const OUTPUT_ROOT_DIR = join(ANALYTICS_DATA_DIR, "execution-quality");
 
 const DEFAULT_ANALYSIS_CONFIG: ImplementationShortfallConfig = {
   provider: "relay",
@@ -189,7 +186,7 @@ function printUsage(): void {
   bun run src/analytics/implementation-shortfall.ts [options]
 
 Options:
-  --provider <lifi|relay|thorchain|chainflip|garden|nearintents|kyberswap>
+  --provider <lifi|relay|thorchain|chainflip|garden|nearintents|cowswap|kyberswap>
   --source-chain <canonical-chain>
   --source-token <symbol>
   --destination-chain <canonical-chain>
@@ -587,6 +584,17 @@ function uniqueStrings(values: readonly string[]): string[] {
   return output;
 }
 
+function buildRouteMatchSymbols(tokenSymbol: string): string[] {
+  const normalized = normalizeSymbol(tokenSymbol);
+  if (normalized === "ETH") {
+    return ["ETH", "WETH"];
+  }
+  if (normalized === "WETH") {
+    return ["WETH"];
+  }
+  return [normalized];
+}
+
 function buildSymbolCandidates(tokenSymbol: string): string[] {
   const normalized = normalizeSymbol(tokenSymbol);
   const candidates: string[] = [normalized];
@@ -955,12 +963,16 @@ async function queryCandidateSwaps(
   connection: DuckDBConnection,
   config: ImplementationShortfallConfig,
 ): Promise<SwapCandidateRow[]> {
+  const sourceSymbols = buildRouteMatchSymbols(config.sourceTokenSymbol);
+  const destinationSymbols = buildRouteMatchSymbols(config.destinationTokenSymbol);
   const params: unknown[] = [
     config.sourceChainCanonical,
     config.destinationChainCanonical,
-    normalizeSymbol(config.sourceTokenSymbol),
-    normalizeSymbol(config.destinationTokenSymbol),
+    ...sourceSymbols,
+    ...destinationSymbols,
   ];
+  const sourcePlaceholders = sourceSymbols.map(() => "?").join(", ");
+  const destinationPlaceholders = destinationSymbols.map(() => "?").join(", ");
 
   let sql = `
     SELECT
@@ -983,8 +995,8 @@ async function queryCandidateSwaps(
       AND COALESCE(event_at, created_at, updated_at) IS NOT NULL
       AND source_chain_canonical = ?
       AND destination_chain_canonical = ?
-      AND UPPER(COALESCE(source_asset_symbol, '')) = ?
-      AND UPPER(COALESCE(destination_asset_symbol, '')) = ?
+      AND UPPER(COALESCE(source_asset_symbol, '')) IN (${sourcePlaceholders})
+      AND UPPER(COALESCE(destination_asset_symbol, '')) IN (${destinationPlaceholders})
   `;
 
   if (config.startAtIso) {

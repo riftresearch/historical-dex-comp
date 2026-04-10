@@ -1,7 +1,8 @@
-const PROVIDER_ORDER = ["lifi", "relay", "thorchain", "chainflip", "garden", "nearintents", "kyberswap"];
+const PROVIDER_ORDER = ["kyberswap", "lifi", "relay", "cowswap", "nearintents", "thorchain", "chainflip", "garden"];
 const PROVIDER_COLORS = {
   lifi: "#FF6F00",
   relay: "#00E5FF",
+  cowswap: "#FF2D55",
   thorchain: "#76FF03",
   chainflip: "#FFD600",
   garden: "#FF1744",
@@ -15,7 +16,7 @@ const state = {
   charts: {
     shortfall: null,
   },
-  activeShortfallView: "usdc_eth_to_btc_bitcoin_all",
+  activeShortfallView: "usdc_base_to_cbbtc_base_all_kyberswap",
   shortfallZoom: {
     startValue: null,
     endValue: null,
@@ -283,6 +284,9 @@ function providerTitle(providerKey) {
   if (providerKey === "kyberswap") {
     return "KyberSwap";
   }
+  if (providerKey === "cowswap") {
+    return "CoW Swap";
+  }
   return providerKey.charAt(0).toUpperCase() + providerKey.slice(1);
 }
 
@@ -313,7 +317,16 @@ async function fetchShortfallSnapshot(viewId) {
     { cache: "no-store" },
   );
   if (!response.ok) {
-    throw new Error(`Shortfall request failed (${response.status})`);
+    let detail = `Shortfall request failed (${response.status})`;
+    try {
+      const payload = await response.json();
+      if (payload && typeof payload.error === "string" && payload.error) {
+        detail = payload.error;
+      }
+    } catch {
+      // Fall back to the generic HTTP error above when the response is not JSON.
+    }
+    throw new Error(detail);
   }
   return response.json();
 }

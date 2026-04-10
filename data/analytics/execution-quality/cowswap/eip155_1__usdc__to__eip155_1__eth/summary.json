@@ -1,0 +1,903 @@
+{
+  "generatedAt": "2026-03-05T04:18:54.287Z",
+  "provider": "cowswap",
+  "tokenPath": {
+    "sourceChainCanonical": "eip155:1",
+    "sourceTokenSymbol": "USDC",
+    "destinationChainCanonical": "eip155:1",
+    "destinationTokenSymbol": "ETH"
+  },
+  "window": {
+    "startAtIso": "2026-02-03T04:10:03.000Z",
+    "endAtIso": "2026-03-05T04:10:03.000Z"
+  },
+  "notionalUsdFilter": {
+    "min": null,
+    "max": null,
+    "minInclusive": false,
+    "maxInclusive": false,
+    "minExclusive": null,
+    "maxExclusive": null,
+    "minInclusiveValue": null,
+    "maxInclusiveValue": null
+  },
+  "signConvention": {
+    "positiveBps": "output USD < input USD (worse for user)",
+    "negativeBps": "output USD > input USD (better for user)"
+  },
+  "totals": {
+    "matchedTrades": 3931,
+    "pricedTrades": 3931,
+    "skippedInvalidTimestamp": 0,
+    "skippedMissingAmount": 0,
+    "skippedNonPositiveAmount": 0,
+    "skippedMissingPrice": 0,
+    "skippedOutsideNotionalBand": 0,
+    "pricedMatchRatePct": 100
+  },
+  "outcomeSummary": {
+    "betterTrades": 665,
+    "worseTrades": 3266,
+    "flatTrades": 0,
+    "betterRatePct": 16.9168,
+    "worseRatePct": 83.0832,
+    "flatRatePct": 0
+  },
+  "bpsSummary": {
+    "count": 3931,
+    "mean": 83.038608,
+    "median": 9.947864,
+    "stdDev": 371.570819,
+    "meanAbs": 86.59746,
+    "min": -346.960482,
+    "p10": -3.458857,
+    "p25": 2.729977,
+    "p50": 9.947864,
+    "p75": 31.098346,
+    "p90": 117.775901,
+    "p95": 353.440961,
+    "p99": 1569.743785,
+    "iqr": 28.36837,
+    "max": 8984.976402
+  },
+  "usdSummary": {
+    "totalInputUsd": 182981632.869552,
+    "totalOutputUsd": 182733353.80055022,
+    "netUsdDelta": 248279.06900176,
+    "weightedShortfallBps": 13.568524,
+    "meanInputUsd": 46548.36755776,
+    "medianInputUsd": 6000,
+    "meanOutputUsd": 46485.2082932,
+    "medianOutputUsd": 5996.09704024,
+    "meanUsdDelta": 63.15926456,
+    "medianUsdDelta": 1.50253782
+  },
+  "histogramBucketBps": 10,
+  "distribution": [
+    {
+      "bucketStartBps": -350,
+      "bucketEndBps": -340,
+      "count": 1
+    },
+    {
+      "bucketStartBps": -230,
+      "bucketEndBps": -220,
+      "count": 1
+    },
+    {
+      "bucketStartBps": -120,
+      "bucketEndBps": -110,
+      "count": 1
+    },
+    {
+      "bucketStartBps": -110,
+      "bucketEndBps": -100,
+      "count": 1
+    },
+    {
+      "bucketStartBps": -80,
+      "bucketEndBps": -70,
+      "count": 3
+    },
+    {
+      "bucketStartBps": -70,
+      "bucketEndBps": -60,
+      "count": 3
+    },
+    {
+      "bucketStartBps": -60,
+      "bucketEndBps": -50,
+      "count": 3
+    },
+    {
+      "bucketStartBps": -50,
+      "bucketEndBps": -40,
+      "count": 10
+    },
+    {
+      "bucketStartBps": -40,
+      "bucketEndBps": -30,
+      "count": 21
+    },
+    {
+      "bucketStartBps": -30,
+      "bucketEndBps": -20,
+      "count": 48
+    },
+    {
+      "bucketStartBps": -20,
+      "bucketEndBps": -10,
+      "count": 119
+    },
+    {
+      "bucketStartBps": -10,
+      "bucketEndBps": 0,
+      "count": 454
+    },
+    {
+      "bucketStartBps": 0,
+      "bucketEndBps": 10,
+      "count": 1305
+    },
+    {
+      "bucketStartBps": 10,
+      "bucketEndBps": 20,
+      "count": 668
+    },
+    {
+      "bucketStartBps": 20,
+      "bucketEndBps": 30,
+      "count": 286
+    },
+    {
+      "bucketStartBps": 30,
+      "bucketEndBps": 40,
+      "count": 156
+    },
+    {
+      "bucketStartBps": 40,
+      "bucketEndBps": 50,
+      "count": 98
+    },
+    {
+      "bucketStartBps": 50,
+      "bucketEndBps": 60,
+      "count": 67
+    },
+    {
+      "bucketStartBps": 60,
+      "bucketEndBps": 70,
+      "count": 85
+    },
+    {
+      "bucketStartBps": 70,
+      "bucketEndBps": 80,
+      "count": 50
+    },
+    {
+      "bucketStartBps": 80,
+      "bucketEndBps": 90,
+      "count": 61
+    },
+    {
+      "bucketStartBps": 90,
+      "bucketEndBps": 100,
+      "count": 46
+    },
+    {
+      "bucketStartBps": 100,
+      "bucketEndBps": 110,
+      "count": 25
+    },
+    {
+      "bucketStartBps": 110,
+      "bucketEndBps": 120,
+      "count": 31
+    },
+    {
+      "bucketStartBps": 120,
+      "bucketEndBps": 130,
+      "count": 15
+    },
+    {
+      "bucketStartBps": 130,
+      "bucketEndBps": 140,
+      "count": 15
+    },
+    {
+      "bucketStartBps": 140,
+      "bucketEndBps": 150,
+      "count": 22
+    },
+    {
+      "bucketStartBps": 150,
+      "bucketEndBps": 160,
+      "count": 12
+    },
+    {
+      "bucketStartBps": 160,
+      "bucketEndBps": 170,
+      "count": 11
+    },
+    {
+      "bucketStartBps": 170,
+      "bucketEndBps": 180,
+      "count": 8
+    },
+    {
+      "bucketStartBps": 180,
+      "bucketEndBps": 190,
+      "count": 5
+    },
+    {
+      "bucketStartBps": 190,
+      "bucketEndBps": 200,
+      "count": 13
+    },
+    {
+      "bucketStartBps": 200,
+      "bucketEndBps": 210,
+      "count": 4
+    },
+    {
+      "bucketStartBps": 210,
+      "bucketEndBps": 220,
+      "count": 5
+    },
+    {
+      "bucketStartBps": 220,
+      "bucketEndBps": 230,
+      "count": 7
+    },
+    {
+      "bucketStartBps": 230,
+      "bucketEndBps": 240,
+      "count": 5
+    },
+    {
+      "bucketStartBps": 240,
+      "bucketEndBps": 250,
+      "count": 7
+    },
+    {
+      "bucketStartBps": 250,
+      "bucketEndBps": 260,
+      "count": 9
+    },
+    {
+      "bucketStartBps": 260,
+      "bucketEndBps": 270,
+      "count": 10
+    },
+    {
+      "bucketStartBps": 270,
+      "bucketEndBps": 280,
+      "count": 7
+    },
+    {
+      "bucketStartBps": 280,
+      "bucketEndBps": 290,
+      "count": 7
+    },
+    {
+      "bucketStartBps": 290,
+      "bucketEndBps": 300,
+      "count": 3
+    },
+    {
+      "bucketStartBps": 300,
+      "bucketEndBps": 310,
+      "count": 2
+    },
+    {
+      "bucketStartBps": 310,
+      "bucketEndBps": 320,
+      "count": 5
+    },
+    {
+      "bucketStartBps": 320,
+      "bucketEndBps": 330,
+      "count": 6
+    },
+    {
+      "bucketStartBps": 330,
+      "bucketEndBps": 340,
+      "count": 4
+    },
+    {
+      "bucketStartBps": 340,
+      "bucketEndBps": 350,
+      "count": 9
+    },
+    {
+      "bucketStartBps": 350,
+      "bucketEndBps": 360,
+      "count": 4
+    },
+    {
+      "bucketStartBps": 360,
+      "bucketEndBps": 370,
+      "count": 3
+    },
+    {
+      "bucketStartBps": 370,
+      "bucketEndBps": 380,
+      "count": 4
+    },
+    {
+      "bucketStartBps": 380,
+      "bucketEndBps": 390,
+      "count": 3
+    },
+    {
+      "bucketStartBps": 390,
+      "bucketEndBps": 400,
+      "count": 3
+    },
+    {
+      "bucketStartBps": 410,
+      "bucketEndBps": 420,
+      "count": 3
+    },
+    {
+      "bucketStartBps": 420,
+      "bucketEndBps": 430,
+      "count": 4
+    },
+    {
+      "bucketStartBps": 430,
+      "bucketEndBps": 440,
+      "count": 3
+    },
+    {
+      "bucketStartBps": 440,
+      "bucketEndBps": 450,
+      "count": 3
+    },
+    {
+      "bucketStartBps": 450,
+      "bucketEndBps": 460,
+      "count": 3
+    },
+    {
+      "bucketStartBps": 460,
+      "bucketEndBps": 470,
+      "count": 2
+    },
+    {
+      "bucketStartBps": 470,
+      "bucketEndBps": 480,
+      "count": 3
+    },
+    {
+      "bucketStartBps": 480,
+      "bucketEndBps": 490,
+      "count": 3
+    },
+    {
+      "bucketStartBps": 490,
+      "bucketEndBps": 500,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 500,
+      "bucketEndBps": 510,
+      "count": 3
+    },
+    {
+      "bucketStartBps": 520,
+      "bucketEndBps": 530,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 530,
+      "bucketEndBps": 540,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 540,
+      "bucketEndBps": 550,
+      "count": 4
+    },
+    {
+      "bucketStartBps": 550,
+      "bucketEndBps": 560,
+      "count": 2
+    },
+    {
+      "bucketStartBps": 560,
+      "bucketEndBps": 570,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 570,
+      "bucketEndBps": 580,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 580,
+      "bucketEndBps": 590,
+      "count": 3
+    },
+    {
+      "bucketStartBps": 590,
+      "bucketEndBps": 600,
+      "count": 8
+    },
+    {
+      "bucketStartBps": 610,
+      "bucketEndBps": 620,
+      "count": 5
+    },
+    {
+      "bucketStartBps": 620,
+      "bucketEndBps": 630,
+      "count": 3
+    },
+    {
+      "bucketStartBps": 630,
+      "bucketEndBps": 640,
+      "count": 4
+    },
+    {
+      "bucketStartBps": 640,
+      "bucketEndBps": 650,
+      "count": 5
+    },
+    {
+      "bucketStartBps": 660,
+      "bucketEndBps": 670,
+      "count": 3
+    },
+    {
+      "bucketStartBps": 670,
+      "bucketEndBps": 680,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 680,
+      "bucketEndBps": 690,
+      "count": 3
+    },
+    {
+      "bucketStartBps": 700,
+      "bucketEndBps": 710,
+      "count": 2
+    },
+    {
+      "bucketStartBps": 720,
+      "bucketEndBps": 730,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 730,
+      "bucketEndBps": 740,
+      "count": 2
+    },
+    {
+      "bucketStartBps": 740,
+      "bucketEndBps": 750,
+      "count": 2
+    },
+    {
+      "bucketStartBps": 750,
+      "bucketEndBps": 760,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 760,
+      "bucketEndBps": 770,
+      "count": 4
+    },
+    {
+      "bucketStartBps": 770,
+      "bucketEndBps": 780,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 780,
+      "bucketEndBps": 790,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 790,
+      "bucketEndBps": 800,
+      "count": 2
+    },
+    {
+      "bucketStartBps": 800,
+      "bucketEndBps": 810,
+      "count": 2
+    },
+    {
+      "bucketStartBps": 810,
+      "bucketEndBps": 820,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 840,
+      "bucketEndBps": 850,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 860,
+      "bucketEndBps": 870,
+      "count": 2
+    },
+    {
+      "bucketStartBps": 870,
+      "bucketEndBps": 880,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 880,
+      "bucketEndBps": 890,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 890,
+      "bucketEndBps": 900,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 900,
+      "bucketEndBps": 910,
+      "count": 3
+    },
+    {
+      "bucketStartBps": 910,
+      "bucketEndBps": 920,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 920,
+      "bucketEndBps": 930,
+      "count": 3
+    },
+    {
+      "bucketStartBps": 930,
+      "bucketEndBps": 940,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 940,
+      "bucketEndBps": 950,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 950,
+      "bucketEndBps": 960,
+      "count": 3
+    },
+    {
+      "bucketStartBps": 960,
+      "bucketEndBps": 970,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 980,
+      "bucketEndBps": 990,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 1010,
+      "bucketEndBps": 1020,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 1020,
+      "bucketEndBps": 1030,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 1040,
+      "bucketEndBps": 1050,
+      "count": 2
+    },
+    {
+      "bucketStartBps": 1060,
+      "bucketEndBps": 1070,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 1080,
+      "bucketEndBps": 1090,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 1090,
+      "bucketEndBps": 1100,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 1110,
+      "bucketEndBps": 1120,
+      "count": 2
+    },
+    {
+      "bucketStartBps": 1130,
+      "bucketEndBps": 1140,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 1160,
+      "bucketEndBps": 1170,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 1200,
+      "bucketEndBps": 1210,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 1210,
+      "bucketEndBps": 1220,
+      "count": 3
+    },
+    {
+      "bucketStartBps": 1230,
+      "bucketEndBps": 1240,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 1250,
+      "bucketEndBps": 1260,
+      "count": 2
+    },
+    {
+      "bucketStartBps": 1270,
+      "bucketEndBps": 1280,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 1320,
+      "bucketEndBps": 1330,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 1330,
+      "bucketEndBps": 1340,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 1350,
+      "bucketEndBps": 1360,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 1370,
+      "bucketEndBps": 1380,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 1390,
+      "bucketEndBps": 1400,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 1400,
+      "bucketEndBps": 1410,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 1460,
+      "bucketEndBps": 1470,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 1470,
+      "bucketEndBps": 1480,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 1510,
+      "bucketEndBps": 1520,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 1590,
+      "bucketEndBps": 1600,
+      "count": 2
+    },
+    {
+      "bucketStartBps": 1630,
+      "bucketEndBps": 1640,
+      "count": 2
+    },
+    {
+      "bucketStartBps": 1640,
+      "bucketEndBps": 1650,
+      "count": 2
+    },
+    {
+      "bucketStartBps": 1690,
+      "bucketEndBps": 1700,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 1700,
+      "bucketEndBps": 1710,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 1770,
+      "bucketEndBps": 1780,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 1850,
+      "bucketEndBps": 1860,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 1900,
+      "bucketEndBps": 1910,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 1910,
+      "bucketEndBps": 1920,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 2020,
+      "bucketEndBps": 2030,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 2160,
+      "bucketEndBps": 2170,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 2170,
+      "bucketEndBps": 2180,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 2210,
+      "bucketEndBps": 2220,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 2240,
+      "bucketEndBps": 2250,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 2260,
+      "bucketEndBps": 2270,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 2270,
+      "bucketEndBps": 2280,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 2330,
+      "bucketEndBps": 2340,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 2350,
+      "bucketEndBps": 2360,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 2420,
+      "bucketEndBps": 2430,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 2480,
+      "bucketEndBps": 2490,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 2520,
+      "bucketEndBps": 2530,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 2560,
+      "bucketEndBps": 2570,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 2640,
+      "bucketEndBps": 2650,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 2750,
+      "bucketEndBps": 2760,
+      "count": 2
+    },
+    {
+      "bucketStartBps": 2820,
+      "bucketEndBps": 2830,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 2990,
+      "bucketEndBps": 3000,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 3280,
+      "bucketEndBps": 3290,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 3600,
+      "bucketEndBps": 3610,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 3850,
+      "bucketEndBps": 3860,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 3860,
+      "bucketEndBps": 3870,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 3920,
+      "bucketEndBps": 3930,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 5820,
+      "bucketEndBps": 5830,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 6050,
+      "bucketEndBps": 6060,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 6750,
+      "bucketEndBps": 6760,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 7110,
+      "bucketEndBps": 7120,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 8980,
+      "bucketEndBps": 8990,
+      "count": 1
+    }
+  ],
+  "output": {
+    "directory": "/home/alpinevm/Development/rift/historical-dex-comp/data/analytics/execution-quality/cowswap/eip155_1__usdc__to__eip155_1__eth",
+    "tradesCsv": "/home/alpinevm/Development/rift/historical-dex-comp/data/analytics/execution-quality/cowswap/eip155_1__usdc__to__eip155_1__eth/trades.csv",
+    "distributionCsv": "/home/alpinevm/Development/rift/historical-dex-comp/data/analytics/execution-quality/cowswap/eip155_1__usdc__to__eip155_1__eth/distribution.csv",
+    "summaryJson": "/home/alpinevm/Development/rift/historical-dex-comp/data/analytics/execution-quality/cowswap/eip155_1__usdc__to__eip155_1__eth/summary.json"
+  },
+  "pricingSource": {
+    "venue": "coinbase",
+    "endpoint": "GET /products/{product_id}/candles",
+    "granularitySeconds": 60,
+    "priceFieldUsed": "close",
+    "cacheDbPath": "/home/alpinevm/Development/rift/historical-dex-comp/data/analytics/coinbase-price-cache.sqlite",
+    "stablecoinPegMode": "usd_1",
+    "stablecoinUsdPegSymbols": [
+      "DAI",
+      "FRAX",
+      "PYUSD",
+      "USDC",
+      "USDC.E",
+      "USDCE",
+      "USDE",
+      "USDT",
+      "USDT0"
+    ]
+  }
+}

@@ -16,7 +16,7 @@ import type { LifiToken, LifiTransferRecord, LifiTransfersResponse } from "./typ
 
 const LIFI_BASE_URL = "https://li.quest";
 const LIFI_SOURCE_ENDPOINT = `${LIFI_BASE_URL}/v1/analytics/transfers`;
-const LIFI_STREAM_KEY = "swaps:lifi:analytics:transfers:v1:cbbtc_mainnet";
+const LIFI_STREAM_KEY = "swaps:lifi:analytics:transfers:v1:evm_paths";
 const LIFI_WINDOW_DAYS = 30;
 const LIFI_RESPONSE_CAP = 1_000;
 const LIFI_PAGE_SIZE_DEFAULT = 1_000;
@@ -26,26 +26,122 @@ const LIFI_MAX_WINDOW_SPLIT_DEPTH = 12;
 
 const CHAIN_ID_MAINNET = "1";
 const CHAIN_CANONICAL_MAINNET = "eip155:1";
+const CHAIN_ID_BASE = "8453";
+const CHAIN_CANONICAL_BASE = "eip155:8453";
 
 const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
-const USDC_ADDRESS = "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48";
-const USDT_ADDRESS = "0xdac17f958d2ee523a2206206994597c13d831ec7";
-const WETH_ADDRESS = "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2";
+const USDC_ADDRESS_MAINNET = "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48";
+const USDT_ADDRESS_MAINNET = "0xdac17f958d2ee523a2206206994597c13d831ec7";
+const WETH_ADDRESS_MAINNET = "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2";
+const USDC_ADDRESS_BASE = "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913";
+const USDT_ADDRESS_BASE = "0xfde4c96c8593536e31f229ea8f37b2ada2699bb2";
+const WETH_ADDRESS_BASE = "0x4200000000000000000000000000000000000006";
 const CBBTC_ADDRESS = "0xcbb7c0000ab88b473b1f5afd9ef808440eed33bf";
 
-interface LifiSourceTokenScope {
-  symbol: "USDC" | "USDT" | "WETH" | "ETH";
-  address: string;
+interface LifiRouteScope {
+  key: string;
+  sourceChainId: string;
+  sourceChainCanonical: string;
+  sourceTokenSymbol: "USDC" | "USDT" | "WETH" | "ETH";
+  sourceTokenAddress: string;
+  destinationChainId: string;
+  destinationChainCanonical: string;
+  destinationTokenSymbol: "USDC" | "ETH" | "CBBTC";
+  destinationTokenAddress: string;
 }
 
-const LIFI_SOURCE_TOKEN_SCOPES: readonly LifiSourceTokenScope[] = [
-  { symbol: "USDC", address: USDC_ADDRESS },
-  { symbol: "USDT", address: USDT_ADDRESS },
-  { symbol: "WETH", address: WETH_ADDRESS },
-  { symbol: "ETH", address: ZERO_ADDRESS },
-] as const;
+function buildLifiRouteScopes(): LifiRouteScope[] {
+  const chainConfigs = [
+    {
+      chainId: CHAIN_ID_MAINNET,
+      chainCanonical: CHAIN_CANONICAL_MAINNET,
+      usdcAddress: USDC_ADDRESS_MAINNET,
+      usdtAddress: USDT_ADDRESS_MAINNET,
+      wethAddress: WETH_ADDRESS_MAINNET,
+    },
+    {
+      chainId: CHAIN_ID_BASE,
+      chainCanonical: CHAIN_CANONICAL_BASE,
+      usdcAddress: USDC_ADDRESS_BASE,
+      usdtAddress: USDT_ADDRESS_BASE,
+      wethAddress: WETH_ADDRESS_BASE,
+    },
+  ];
 
-const ALLOWED_SOURCE_SYMBOLS = new Set(["USDC", "USDT", "ETH", "WETH"]);
+  const scopes: LifiRouteScope[] = [];
+  for (const chain of chainConfigs) {
+    const cbbtcRoutes: Array<Pick<LifiRouteScope, "sourceTokenSymbol" | "sourceTokenAddress">> = [
+      { sourceTokenSymbol: "USDC", sourceTokenAddress: chain.usdcAddress },
+      { sourceTokenSymbol: "USDT", sourceTokenAddress: chain.usdtAddress },
+      { sourceTokenSymbol: "WETH", sourceTokenAddress: chain.wethAddress },
+      { sourceTokenSymbol: "ETH", sourceTokenAddress: ZERO_ADDRESS },
+    ];
+    for (const route of cbbtcRoutes) {
+      scopes.push({
+        key: `${chain.chainId}:${route.sourceTokenSymbol}->CBBTC`,
+        sourceChainId: chain.chainId,
+        sourceChainCanonical: chain.chainCanonical,
+        sourceTokenSymbol: route.sourceTokenSymbol,
+        sourceTokenAddress: route.sourceTokenAddress,
+        destinationChainId: chain.chainId,
+        destinationChainCanonical: chain.chainCanonical,
+        destinationTokenSymbol: "CBBTC",
+        destinationTokenAddress: CBBTC_ADDRESS,
+      });
+    }
+
+    scopes.push({
+      key: `${chain.chainId}:USDC->ETH`,
+      sourceChainId: chain.chainId,
+      sourceChainCanonical: chain.chainCanonical,
+      sourceTokenSymbol: "USDC",
+      sourceTokenAddress: chain.usdcAddress,
+      destinationChainId: chain.chainId,
+      destinationChainCanonical: chain.chainCanonical,
+      destinationTokenSymbol: "ETH",
+      destinationTokenAddress: ZERO_ADDRESS,
+    });
+    scopes.push({
+      key: `${chain.chainId}:ETH->USDC`,
+      sourceChainId: chain.chainId,
+      sourceChainCanonical: chain.chainCanonical,
+      sourceTokenSymbol: "ETH",
+      sourceTokenAddress: ZERO_ADDRESS,
+      destinationChainId: chain.chainId,
+      destinationChainCanonical: chain.chainCanonical,
+      destinationTokenSymbol: "USDC",
+      destinationTokenAddress: chain.usdcAddress,
+    });
+  }
+  return scopes;
+}
+
+const LIFI_ROUTE_SCOPES = buildLifiRouteScopes();
+
+function resolveLifiRouteScopes(): readonly LifiRouteScope[] {
+  const rawFilter = nonEmptyOrNull(Bun.env.LIFI_SCOPE_KEYS ?? process.env.LIFI_SCOPE_KEYS);
+  if (!rawFilter) {
+    return LIFI_ROUTE_SCOPES;
+  }
+
+  const requestedKeys = new Set(
+    rawFilter
+      .split(",")
+      .map((value) => value.trim())
+      .filter((value) => value.length > 0),
+  );
+  if (requestedKeys.size === 0) {
+    return LIFI_ROUTE_SCOPES;
+  }
+
+  const filteredScopes = LIFI_ROUTE_SCOPES.filter((scope) => requestedKeys.has(scope.key));
+  if (filteredScopes.length === 0) {
+    throw new Error(
+      `LIFI_SCOPE_KEYS did not match any known scopes. Available scopes: ${LIFI_ROUTE_SCOPES.map((scope) => scope.key).join(", ")}`,
+    );
+  }
+  return filteredScopes;
+}
 
 interface LifiWindow {
   fromTs: Date | null;
@@ -60,7 +156,7 @@ interface LifiWindowChunk {
 }
 
 interface LifiFetchInput {
-  scope: LifiSourceTokenScope;
+  scope: LifiRouteScope;
   window: LifiWindow;
 }
 
@@ -168,6 +264,45 @@ function buildLifiWindow(mode: IngestMode, checkpoint: IngestCheckpoint | null, 
   };
 }
 
+function resolveOverrideTimestamp(
+  envValue: string | undefined,
+  flagName: string,
+): number | null {
+  const normalized = nonEmptyOrNull(envValue);
+  if (!normalized) {
+    return null;
+  }
+  const parsed = Number(normalized);
+  if (!Number.isFinite(parsed) || !Number.isInteger(parsed) || parsed < 0) {
+    throw new Error(`Invalid ${flagName} environment variable '${normalized}'. Expected unix seconds.`);
+  }
+  return parsed;
+}
+
+function applyLifiWindowOverrides(window: LifiWindow): LifiWindow {
+  const fromOverride = resolveOverrideTimestamp(
+    Bun.env.LIFI_FROM_TIMESTAMP ?? process.env.LIFI_FROM_TIMESTAMP,
+    "LIFI_FROM_TIMESTAMP",
+  );
+  const toOverride = resolveOverrideTimestamp(
+    Bun.env.LIFI_TO_TIMESTAMP ?? process.env.LIFI_TO_TIMESTAMP,
+    "LIFI_TO_TIMESTAMP",
+  );
+
+  if (fromOverride === null && toOverride === null) {
+    return window;
+  }
+
+  const fromTimestamp = fromOverride ?? window.fromTimestamp;
+  const toTimestamp = toOverride ?? window.toTimestamp;
+  return {
+    fromTs: fromTimestamp === null ? null : new Date(fromTimestamp * 1_000),
+    toTs: toTimestamp === null ? null : new Date(toTimestamp * 1_000),
+    fromTimestamp,
+    toTimestamp,
+  };
+}
+
 function buildLifiWindowFromUnix(fromTimestamp: number, toTimestamp: number): LifiWindow {
   return {
     fromTs: new Date(fromTimestamp * 1_000),
@@ -221,10 +356,10 @@ function formatLifiWindow(window: LifiWindow): string {
 
 function buildLifiTransfersUrl(input: LifiFetchInput): string {
   const url = new URL(LIFI_SOURCE_ENDPOINT);
-  url.searchParams.set("fromChain", CHAIN_ID_MAINNET);
-  url.searchParams.set("toChain", CHAIN_ID_MAINNET);
-  url.searchParams.set("fromToken", input.scope.address);
-  url.searchParams.set("toToken", CBBTC_ADDRESS);
+  url.searchParams.set("fromChain", input.scope.sourceChainId);
+  url.searchParams.set("toChain", input.scope.destinationChainId);
+  url.searchParams.set("fromToken", input.scope.sourceTokenAddress);
+  url.searchParams.set("toToken", input.scope.destinationTokenAddress);
   if (input.window.fromTimestamp !== null) {
     url.searchParams.set("fromTimestamp", String(input.window.fromTimestamp));
   }
@@ -357,7 +492,7 @@ function isFinalLifiStatus(statusCanonical: NormalizedSwapRowInput["status_canon
   );
 }
 
-function isSupportedLifiCbbtcPath(
+function isSupportedLifiRoute(
   row: Pick<
     NormalizedSwapRowInput,
     | "source_chain_canonical"
@@ -367,44 +502,43 @@ function isSupportedLifiCbbtcPath(
     | "source_asset_id"
     | "destination_asset_id"
   >,
+  scope: LifiRouteScope,
 ): boolean {
-  if (row.source_chain_canonical !== CHAIN_CANONICAL_MAINNET) {
+  if (row.source_chain_canonical !== scope.sourceChainCanonical) {
     return false;
   }
-  if (row.destination_chain_canonical !== CHAIN_CANONICAL_MAINNET) {
+  if (row.destination_chain_canonical !== scope.destinationChainCanonical) {
+    return false;
+  }
+
+  const expectedSourceAssetId =
+    scope.sourceTokenAddress === ZERO_ADDRESS
+      ? `${scope.sourceChainId}:native`
+      : `${scope.sourceChainId}:${scope.sourceTokenAddress}`;
+  const expectedDestinationAssetId =
+    scope.destinationTokenAddress === ZERO_ADDRESS
+      ? `${scope.destinationChainId}:native`
+      : `${scope.destinationChainId}:${scope.destinationTokenAddress}`;
+
+  const sourceAssetId = nonEmptyOrNull(row.source_asset_id)?.toLowerCase() ?? "";
+  const destinationAssetId = nonEmptyOrNull(row.destination_asset_id)?.toLowerCase() ?? "";
+  if (sourceAssetId !== expectedSourceAssetId.toLowerCase()) {
+    return false;
+  }
+  if (destinationAssetId !== expectedDestinationAssetId.toLowerCase()) {
     return false;
   }
 
   const sourceSymbol = normalizeSymbol(row.source_asset_symbol ?? null);
-  if (!sourceSymbol || !ALLOWED_SOURCE_SYMBOLS.has(sourceSymbol)) {
+  if (!sourceSymbol || sourceSymbol !== scope.sourceTokenSymbol) {
     return false;
   }
-
   const destinationSymbol = normalizeSymbol(row.destination_asset_symbol ?? null);
-  if (destinationSymbol !== "CBBTC") {
+  if (!destinationSymbol || destinationSymbol !== scope.destinationTokenSymbol) {
     return false;
   }
 
-  const destinationAssetId = nonEmptyOrNull(row.destination_asset_id)?.toLowerCase() ?? null;
-  if (destinationAssetId !== `${CHAIN_ID_MAINNET}:${CBBTC_ADDRESS}`) {
-    return false;
-  }
-
-  const sourceAssetId = nonEmptyOrNull(row.source_asset_id)?.toLowerCase() ?? "";
-  if (sourceSymbol === "ETH") {
-    return sourceAssetId === `${CHAIN_ID_MAINNET}:native`;
-  }
-  if (sourceSymbol === "USDC") {
-    return sourceAssetId === `${CHAIN_ID_MAINNET}:${USDC_ADDRESS}`;
-  }
-  if (sourceSymbol === "USDT") {
-    return sourceAssetId === `${CHAIN_ID_MAINNET}:${USDT_ADDRESS}`;
-  }
-  if (sourceSymbol === "WETH") {
-    return sourceAssetId === `${CHAIN_ID_MAINNET}:${WETH_ADDRESS}`;
-  }
-
-  return false;
+  return true;
 }
 
 function normalizeLifiRecord(
@@ -413,6 +547,7 @@ function normalizeLifiRecord(
   observedAt: Date,
   sourceCursor: string,
   expectedSourceSymbol: string,
+  expectedDestinationSymbol: string,
 ): NormalizedLifiSwap | null {
   const eventAt = deriveEventAt(record);
 
@@ -439,7 +574,7 @@ function normalizeLifiRecord(
   });
 
   const sourceSymbol = normalizeSymbol(sourceToken?.symbol ?? null) ?? expectedSourceSymbol;
-  const destinationSymbol = normalizeSymbol(destinationToken?.symbol ?? null);
+  const destinationSymbol = normalizeSymbol(destinationToken?.symbol ?? null) ?? expectedDestinationSymbol;
 
   const sourceAssetDecimals = inferTokenDecimals({
     provider: "lifi",
@@ -622,7 +757,8 @@ async function ingestLifi(
   pageSize: number,
   maxPages: number | null,
 ): Promise<ProviderIngestOutput> {
-  const window = buildLifiWindow(mode, checkpoint, now);
+  const window = applyLifiWindowOverrides(buildLifiWindow(mode, checkpoint, now));
+  const routeScopes = resolveLifiRouteScopes();
   const effectivePageSize = clampPageSize(pageSize);
   if (effectivePageSize !== LIFI_RESPONSE_CAP) {
     // LI.FI analytics endpoint response appears capped at 1000 regardless of explicit limit,
@@ -645,7 +781,7 @@ async function ingestLifi(
   const maxRequestsPerScope =
     maxPages === null
       ? null
-      : Math.max(1, Math.floor(maxPages / LIFI_SOURCE_TOKEN_SCOPES.length));
+      : Math.max(1, Math.floor(maxPages / routeScopes.length));
 
   let recordsFetched = 0;
   let recordsNormalized = 0;
@@ -653,7 +789,7 @@ async function ingestLifi(
   let newestBoundary: BoundaryPoint | null = null;
   let oldestBoundary: BoundaryPoint | null = null;
 
-  for (const scope of LIFI_SOURCE_TOKEN_SCOPES) {
+  for (const scope of routeScopes) {
     const queue: LifiWindowChunk[] = [{ window, depth: 0 }];
     const seenWindowKeys = new Set<string>();
     let requestsForScope = 0;
@@ -668,7 +804,7 @@ async function ingestLifi(
         continue;
       }
 
-      const windowKey = `${scope.symbol}|${formatLifiWindow(chunk.window)}|d:${chunk.depth}`;
+      const windowKey = `${scope.key}|${formatLifiWindow(chunk.window)}|d:${chunk.depth}`;
       if (seenWindowKeys.has(windowKey)) {
         continue;
       }
@@ -697,7 +833,7 @@ async function ingestLifi(
       }
 
       const observedAt = new Date();
-      const sourceCursor = `scope:${scope.symbol}|window:${formatLifiWindow(chunk.window)}|depth:${chunk.depth}`;
+      const sourceCursor = `scope:${scope.key}|window:${formatLifiWindow(chunk.window)}|depth:${chunk.depth}`;
       const coreRows: NormalizedSwapRowInput[] = [];
       const rawRows: RawSwapRowInput[] = [];
 
@@ -707,7 +843,8 @@ async function ingestLifi(
           runId,
           observedAt,
           sourceCursor,
-          scope.symbol,
+          scope.sourceTokenSymbol,
+          scope.destinationTokenSymbol,
         );
         if (!normalized) {
           continue;
@@ -718,7 +855,7 @@ async function ingestLifi(
         if (normalized.core.status_canonical !== "success") {
           continue;
         }
-        if (!isSupportedLifiCbbtcPath(normalized.core)) {
+        if (!isSupportedLifiRoute(normalized.core, scope)) {
           continue;
         }
         if (!isSwapRowWithinIngestScope(normalized.core)) {

@@ -38,36 +38,60 @@
             <label>
               View
               <select id="shortfall-view-select">
-                <option value="usdc_eth_to_btc_bitcoin_all" selected>
-                  USDC/ethereum -> BTC/bitcoin
-                </option>
-                <option value="usdt_eth_to_btc_bitcoin_all">
-                  USDT/ethereum -> BTC/bitcoin
-                </option>
-                <option value="eth_eth_to_btc_bitcoin_all">
-                  ETH/ethereum -> BTC/bitcoin
-                </option>
-                <option value="btc_bitcoin_to_usdc_eth_all">
-                  BTC/bitcoin -> USDC/ethereum
-                </option>
-                <option value="btc_bitcoin_to_usdt_eth_all">
-                  BTC/bitcoin -> USDT/ethereum
-                </option>
-                <option value="btc_bitcoin_to_eth_eth_all">
-                  BTC/bitcoin -> ETH/ethereum
-                </option>
-                <option value="usdc_eth_to_cbbtc_eth_all_kyberswap">
-                  USDC/ethereum -> CBBTC/ethereum (KyberSwap+LI.FI+Relay)
-                </option>
-                <option value="eth_eth_to_cbbtc_eth_all_kyberswap">
-                  ETH/ethereum -> CBBTC/ethereum (KyberSwap+LI.FI+Relay)
-                </option>
-                <option value="usdt_eth_to_cbbtc_eth_all_kyberswap">
-                  USDT/ethereum -> CBBTC/ethereum (KyberSwap+LI.FI+Relay)
-                </option>
-                <option value="weth_eth_to_cbbtc_eth_all_kyberswap">
-                  WETH/ethereum -> CBBTC/ethereum (KyberSwap+LI.FI+Relay)
-                </option>
+                <optgroup label="Base Same-Chain">
+                  <option value="usdc_base_to_cbbtc_base_all_kyberswap" selected>
+                    base.USDC -> base.CBBTC
+                  </option>
+                  <option value="eth_base_to_cbbtc_base_all_kyberswap">
+                    base.ETH -> base.CBBTC
+                  </option>
+                  <option value="usdt_base_to_cbbtc_base_all_kyberswap">
+                    base.USDT -> base.CBBTC
+                  </option>
+                  <option value="usdc_base_to_eth_base_all">
+                    base.USDC -> base.ETH
+                  </option>
+                  <option value="eth_base_to_usdc_base_all">
+                    base.ETH -> base.USDC
+                  </option>
+                </optgroup>
+                <optgroup label="Ethereum Same-Chain">
+                  <option value="usdc_eth_to_cbbtc_eth_all_kyberswap">
+                    ethereum.USDC -> ethereum.CBBTC
+                  </option>
+                  <option value="eth_eth_to_cbbtc_eth_all_kyberswap">
+                    ethereum.ETH -> ethereum.CBBTC
+                  </option>
+                  <option value="usdt_eth_to_cbbtc_eth_all_kyberswap">
+                    ethereum.USDT -> ethereum.CBBTC
+                  </option>
+                  <option value="usdc_eth_to_eth_eth_all">
+                    ethereum.USDC -> ethereum.ETH
+                  </option>
+                  <option value="eth_eth_to_usdc_eth_all">
+                    ethereum.ETH -> ethereum.USDC
+                  </option>
+                </optgroup>
+                <optgroup label="Ethereum/Bitcoin Cross-Chain">
+                  <option value="usdc_eth_to_btc_bitcoin_all">
+                    ethereum.USDC -> bitcoin.BTC
+                  </option>
+                  <option value="usdt_eth_to_btc_bitcoin_all">
+                    ethereum.USDT -> bitcoin.BTC
+                  </option>
+                  <option value="eth_eth_to_btc_bitcoin_all">
+                    ethereum.ETH -> bitcoin.BTC
+                  </option>
+                  <option value="btc_bitcoin_to_usdc_eth_all">
+                    bitcoin.BTC -> ethereum.USDC
+                  </option>
+                  <option value="btc_bitcoin_to_usdt_eth_all">
+                    bitcoin.BTC -> ethereum.USDT
+                  </option>
+                  <option value="btc_bitcoin_to_eth_eth_all">
+                    bitcoin.BTC -> ethereum.ETH
+                  </option>
+                </optgroup>
               </select>
             </label>
             <label>
@@ -83,6 +107,13 @@
             </label>
           </div>
         </div>
+        <p class="shortfall-guide">
+          <strong>What this shows:</strong> for each order size in the analyzed time period, which
+          provider historically gave a better or worse fill. Lower lines mean less slippage and
+          better execution. If a line climbs as size increases, that provider gets more expensive on
+          larger trades. The spread band, when enabled, shows how consistent or noisy those outcomes
+          are.
+        </p>
         <div class="chart shortfall-quantile-chart" id="shortfall-quantile-chart"></div>
       </section>
 

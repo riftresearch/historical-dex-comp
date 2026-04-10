@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-02-25T23:14:23.810Z",
+  "generatedAt": "2026-04-08T17:29:18.493Z",
   "provider": "relay",
   "tokenPath": {
     "sourceChainCanonical": "eip155:1",
@@ -8,8 +8,8 @@
     "destinationTokenSymbol": "CBBTC"
   },
   "window": {
-    "startAtIso": "2026-01-01T00:00:00.000Z",
-    "endAtIso": "2026-02-25T23:59:59.000Z"
+    "startAtIso": "2026-03-09T17:26:00.000Z",
+    "endAtIso": "2026-04-08T17:26:00.000Z"
   },
   "notionalUsdFilter": {
     "min": null,
@@ -26,60 +26,54 @@
     "negativeBps": "output USD > input USD (better for user)"
   },
   "totals": {
-    "matchedTrades": 1,
-    "pricedTrades": 1,
+    "matchedTrades": 0,
+    "pricedTrades": 0,
     "skippedInvalidTimestamp": 0,
     "skippedMissingAmount": 0,
     "skippedNonPositiveAmount": 0,
     "skippedMissingPrice": 0,
     "skippedOutsideNotionalBand": 0,
-    "pricedMatchRatePct": 100
+    "pricedMatchRatePct": null
   },
   "outcomeSummary": {
     "betterTrades": 0,
-    "worseTrades": 1,
+    "worseTrades": 0,
     "flatTrades": 0,
-    "betterRatePct": 0,
-    "worseRatePct": 100,
-    "flatRatePct": 0
+    "betterRatePct": null,
+    "worseRatePct": null,
+    "flatRatePct": null
   },
   "bpsSummary": {
-    "count": 1,
-    "mean": 88.819264,
-    "median": 88.819264,
+    "count": 0,
+    "mean": null,
+    "median": null,
     "stdDev": null,
-    "meanAbs": 88.819264,
-    "min": 88.819264,
-    "p10": 88.819264,
-    "p25": 88.819264,
-    "p50": 88.819264,
-    "p75": 88.819264,
-    "p90": 88.819264,
-    "p95": 88.819264,
-    "p99": 88.819264,
-    "iqr": 0,
-    "max": 88.819264
+    "meanAbs": null,
+    "min": null,
+    "p10": null,
+    "p25": null,
+    "p50": null,
+    "p75": null,
+    "p90": null,
+    "p95": null,
+    "p99": null,
+    "iqr": null,
+    "max": null
   },
   "usdSummary": {
-    "totalInputUsd": 3994.896845,
-    "totalOutputUsd": 3959.41446533,
-    "netUsdDelta": 35.48237967,
-    "weightedShortfallBps": 88.819264,
-    "meanInputUsd": 3994.896845,
-    "medianInputUsd": 3994.896845,
-    "meanOutputUsd": 3959.41446533,
-    "medianOutputUsd": 3959.41446533,
-    "meanUsdDelta": 35.48237967,
-    "medianUsdDelta": 35.48237967
+    "totalInputUsd": 0,
+    "totalOutputUsd": 0,
+    "netUsdDelta": 0,
+    "weightedShortfallBps": null,
+    "meanInputUsd": null,
+    "medianInputUsd": null,
+    "meanOutputUsd": null,
+    "medianOutputUsd": null,
+    "meanUsdDelta": null,
+    "medianUsdDelta": null
   },
   "histogramBucketBps": 10,
-  "distribution": [
-    {
-      "bucketStartBps": 80,
-      "bucketEndBps": 90,
-      "count": 1
-    }
-  ],
+  "distribution": [],
   "output": {
     "directory": "/home/alpinevm/Development/rift/historical-dex-comp/data/analytics/execution-quality/relay/eip155_1__usdc__to__eip155_1__cbbtc",
     "tradesCsv": "/home/alpinevm/Development/rift/historical-dex-comp/data/analytics/execution-quality/relay/eip155_1__usdc__to__eip155_1__cbbtc/trades.csv",

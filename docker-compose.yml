@@ -6,7 +6,7 @@ services:
     env_file:
       - .env
     environment:
-      PROVIDERS: ${PROVIDERS:-lifi,relay,thorchain,chainflip,garden,nearintents,kyberswap}
+      PROVIDERS: ${PROVIDERS:-lifi,relay,thorchain,chainflip,garden,nearintents,cowswap,kyberswap}
       MODE: ${MODE:-backfill_older}
       STOP_AT_OLDEST: ${STOP_AT_OLDEST:-}
     volumes:

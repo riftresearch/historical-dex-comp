@@ -18,7 +18,7 @@ export const INGEST_SCOPE_ALLOWED_ASSETS: readonly IngestScopeAssetRule[] = [
   { symbol: "BTC", allowedChains: ["bitcoin:mainnet"] },
   { symbol: "CBBTC", allowedChains: ["eip155:1", "eip155:8453"] },
   { symbol: "USDC", allowedChains: ["eip155:1", "eip155:8453"] },
-  { symbol: "USDT", allowedChains: ["eip155:1"] },
+  { symbol: "USDT", allowedChains: ["eip155:1", "eip155:8453"] },
   { symbol: "ETH", allowedChains: ["eip155:1", "eip155:8453"] },
   { symbol: "WETH", allowedChains: ["eip155:1", "eip155:8453"] },
 ] as const;

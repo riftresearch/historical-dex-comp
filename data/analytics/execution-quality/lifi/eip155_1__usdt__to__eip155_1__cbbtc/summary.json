@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-02-25T23:14:23.419Z",
+  "generatedAt": "2026-03-05T07:01:05.796Z",
   "provider": "lifi",
   "tokenPath": {
     "sourceChainCanonical": "eip155:1",
@@ -8,8 +8,8 @@
     "destinationTokenSymbol": "CBBTC"
   },
   "window": {
-    "startAtIso": "2026-01-01T00:00:00.000Z",
-    "endAtIso": "2026-02-25T23:59:59.000Z"
+    "startAtIso": "2026-02-03T06:54:54.000Z",
+    "endAtIso": "2026-03-05T06:54:54.000Z"
   },
   "notionalUsdFilter": {
     "min": null,
@@ -26,8 +26,8 @@
     "negativeBps": "output USD > input USD (better for user)"
   },
   "totals": {
-    "matchedTrades": 71,
-    "pricedTrades": 71,
+    "matchedTrades": 41,
+    "pricedTrades": 41,
     "skippedInvalidTimestamp": 0,
     "skippedMissingAmount": 0,
     "skippedNonPositiveAmount": 0,
@@ -36,78 +36,63 @@
     "pricedMatchRatePct": 100
   },
   "outcomeSummary": {
-    "betterTrades": 11,
-    "worseTrades": 60,
+    "betterTrades": 10,
+    "worseTrades": 31,
     "flatTrades": 0,
-    "betterRatePct": 15.493,
-    "worseRatePct": 84.507,
+    "betterRatePct": 24.3902,
+    "worseRatePct": 75.6098,
     "flatRatePct": 0
   },
   "bpsSummary": {
-    "count": 71,
-    "mean": 17.726026,
-    "median": 12.315322,
-    "stdDev": 200.484151,
-    "meanAbs": 51.81787,
-    "min": -1172.24875,
-    "p10": -1.038857,
-    "p25": 5.607195,
-    "p50": 12.315322,
-    "p75": 22.189405,
-    "p90": 59.417203,
-    "p95": 62.717625,
-    "p99": 424.236075,
-    "iqr": 16.58221,
-    "max": 1187.416819
+    "count": 41,
+    "mean": 13.427238,
+    "median": 9.530248,
+    "stdDev": 19.861082,
+    "meanAbs": 15.088819,
+    "min": -7.930195,
+    "p10": -3.421586,
+    "p25": 0.751427,
+    "p50": 9.530248,
+    "p75": 17.519927,
+    "p90": 26.328994,
+    "p95": 50.864729,
+    "p99": 82.105294,
+    "iqr": 16.7685,
+    "max": 97.158613
   },
   "usdSummary": {
-    "totalInputUsd": 558238.876731,
-    "totalOutputUsd": 556666.51558234,
-    "netUsdDelta": 1572.36114866,
-    "weightedShortfallBps": 28.166457,
-    "meanInputUsd": 7862.51939058,
-    "medianInputUsd": 902,
-    "meanOutputUsd": 7840.37345891,
-    "medianOutputUsd": 901.13572708,
-    "meanUsdDelta": 22.14593167,
-    "medianUsdDelta": 0.86427292
+    "totalInputUsd": 180596.998433,
+    "totalOutputUsd": 180329.0646933,
+    "netUsdDelta": 267.9337397,
+    "weightedShortfallBps": 14.836002,
+    "meanInputUsd": 4404.80483983,
+    "medianInputUsd": 700,
+    "meanOutputUsd": 4398.26987057,
+    "medianOutputUsd": 699.14309247,
+    "meanUsdDelta": 6.53496926,
+    "medianUsdDelta": 0.51915452
   },
   "histogramBucketBps": 10,
   "distribution": [
     {
-      "bucketStartBps": -1180,
-      "bucketEndBps": -1170,
-      "count": 1
-    },
-    {
-      "bucketStartBps": -20,
-      "bucketEndBps": -10,
-      "count": 1
-    },
-    {
       "bucketStartBps": -10,
       "bucketEndBps": 0,
-      "count": 9
+      "count": 10
     },
     {
       "bucketStartBps": 0,
       "bucketEndBps": 10,
-      "count": 16
+      "count": 11
     },
     {
       "bucketStartBps": 10,
       "bucketEndBps": 20,
-      "count": 22
+      "count": 11
     },
     {
       "bucketStartBps": 20,
       "bucketEndBps": 30,
-      "count": 10
-    },
-    {
-      "bucketStartBps": 30,
-      "bucketEndBps": 40,
-      "count": 1
+      "count": 5
     },
     {
       "bucketStartBps": 40,
@@ -117,21 +102,11 @@
     {
       "bucketStartBps": 50,
       "bucketEndBps": 60,
-      "count": 4
-    },
-    {
-      "bucketStartBps": 60,
-      "bucketEndBps": 70,
-      "count": 4
+      "count": 2
     },
     {
       "bucketStartBps": 90,
       "bucketEndBps": 100,
-      "count": 1
-    },
-    {
-      "bucketStartBps": 1180,
-      "bucketEndBps": 1190,
       "count": 1
     }
   ],

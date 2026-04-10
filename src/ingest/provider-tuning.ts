@@ -9,7 +9,7 @@ export interface ProviderIngestTuning {
 const PROVIDER_INGEST_TUNING: Record<ProviderKey, ProviderIngestTuning> = {
   lifi: {
     pageSize: 1000,
-    maxPages: 300,
+    maxPages: null,
     sleepSeconds: 5,
   },
   relay: {
@@ -37,9 +37,14 @@ const PROVIDER_INGEST_TUNING: Record<ProviderKey, ProviderIngestTuning> = {
     maxPages: 100,
     sleepSeconds: 5,
   },
+  cowswap: {
+    pageSize: 2000,
+    maxPages: 12000,
+    sleepSeconds: 5,
+  },
   kyberswap: {
-    pageSize: 10000,
-    maxPages: 30,
+    pageSize: 2000,
+    maxPages: 12000,
     sleepSeconds: 5,
   },
 };

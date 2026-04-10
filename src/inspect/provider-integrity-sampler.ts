@@ -13,11 +13,17 @@ import {
 import { fetchJsonWithRetry } from "../lib/http";
 import {
   mapGardenStatus,
+  mapLifiStatus,
   mapNearIntentsStatus,
   mapRelayStatus,
   mapThorchainStatus,
   type CanonicalStatus,
 } from "../domain/status";
+import {
+  runProviderReconciliation,
+  type ProviderReconciliationReport,
+} from "./provider-reconciliation";
+import type { LifiTransferRecord, LifiTransfersResponse } from "../providers/lifi/types";
 import type { NearIntentsTransaction, NearIntentsTransactionsPagesResponse } from "../providers/nearintents/types";
 import type { GardenOrder, GardenOrdersResponse, GardenSwap } from "../providers/garden/types";
 import type { RelayCurrency, RelayCurrencyAmount, RelayRequestData, RelayRequestRecord, RelayRequestTx, RelayRequestsPageResponse } from "../providers/relay/types";
@@ -28,6 +34,7 @@ import { sha256Hex } from "../utils/hash";
 import { addDays, parseDateOrNull, parseUnixSecondsOrNull, toUnixSeconds } from "../utils/time";
 
 const RELAY_SOURCE_ENDPOINT = "https://api.relay.link/requests/v2";
+const LIFI_SOURCE_ENDPOINT = "https://li.quest/v1/analytics/transfers";
 const THORCHAIN_BASE_URL = "https://midgard.ninerealms.com";
 const THORCHAIN_SOURCE_ENDPOINT = `${THORCHAIN_BASE_URL}/v2/actions`;
 const CHAINFLIP_SOURCE_ENDPOINT = "https://explorer-service-processor.chainflip.io/graphql";
@@ -35,6 +42,10 @@ const GARDEN_SOURCE_ENDPOINT = "https://api.garden.finance/v2/orders";
 const NEAR_INTENTS_SOURCE_ENDPOINT = "https://explorer.near-intents.org/api/v0/transactions-pages";
 
 const NEAR_INTENTS_REQUEST_INTERVAL_MS = 5_000;
+
+const LIFI_RESPONSE_CAP = 1_000;
+const LIFI_MIN_WINDOW_SPLIT_SECONDS = 60;
+const LIFI_MAX_WINDOW_SPLIT_DEPTH = 12;
 
 const RELAY_PAGE_SIZE = 50;
 const THORCHAIN_PAGE_SIZE = 200;
@@ -47,6 +58,27 @@ const DEFAULT_MAX_PAGES = 2;
 const DEFAULT_SCOPES_PER_PROVIDER = 9;
 const DEFAULT_WINDOW_DAYS = 30;
 const DEFAULT_SEED = 1337;
+
+const CHAIN_ID_MAINNET = "1";
+const CHAIN_CANONICAL_MAINNET = "eip155:1";
+const CHAIN_ID_BASE = "8453";
+const CHAIN_CANONICAL_BASE = "eip155:8453";
+const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
+const ETH_SENTINEL_ADDRESS = "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee";
+const USDC_ADDRESS_MAINNET = "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48";
+const USDT_ADDRESS_MAINNET = "0xdac17f958d2ee523a2206206994597c13d831ec7";
+const WETH_ADDRESS_MAINNET = "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2";
+const USDC_ADDRESS_BASE = "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913";
+const USDT_ADDRESS_BASE = "0xfde4c96c8593536e31f229ea8f37b2ada2699bb2";
+const WETH_ADDRESS_BASE = "0x4200000000000000000000000000000000000006";
+const CBBTC_ADDRESS = "0xcbb7c0000ab88b473b1f5afd9ef808440eed33bf";
+const DEFAULT_BASE_RPC_URL = "https://base-rpc.publicnode.com";
+const KYBERSWAP_SWAPPED_TOPIC0 =
+  "0xd6d4f5681c246c9f42c203e287975af1601f8df8035a9251f79aab5c8f09e2f8";
+const COWSWAP_TRADE_TOPIC0 =
+  "0xa07a543ab8a018198e99ca0184c93fe9050a79400a0a723441f84de1d972cc17";
+const KYBERSWAP_DEFAULT_META_AGGREGATOR = "0x6131b5fae19ea4f9d964eac0408e4408b66337b5";
+const COWSWAP_DEFAULT_SETTLEMENT_CONTRACT = "0x9008d19f58aabd9ed0d60971565aa8510560ab41";
 
 interface ProviderBoundsRow {
   swaps: number | bigint;
@@ -120,6 +152,7 @@ export interface ProviderIntegrityAuditReport {
   dbNewestEventAt: string | null;
   windowStart: string;
   windowEnd: string;
+  reconciliation: ProviderReconciliationReport;
   apiRequests: number;
   candidatesCollected: number;
   sampled: number;
@@ -148,6 +181,18 @@ interface RelayScope {
   destinationChainCanonical: string;
 }
 
+interface LifiScope {
+  key: string;
+  sourceChainId: string;
+  destinationChainId: string;
+  sourceChainCanonical: string;
+  destinationChainCanonical: string;
+  sourceTokenSymbol: "USDC" | "USDT" | "WETH" | "ETH";
+  sourceTokenAddress: string;
+  destinationTokenSymbol: "USDC" | "ETH" | "CBBTC";
+  destinationTokenAddress: string;
+}
+
 interface GardenScope {
   key: string;
   fromChain: string;
@@ -162,6 +207,79 @@ interface NearIntentsScope {
   toChainId: string;
   sourceChainCanonical: string;
   destinationChainCanonical: string;
+}
+
+interface JsonRpcError {
+  code: number;
+  message: string;
+  data?: unknown;
+}
+
+interface JsonRpcResponse<T> {
+  jsonrpc: string;
+  id: number | string | null;
+  result?: T;
+  error?: JsonRpcError;
+}
+
+interface EthLog {
+  address: string;
+  blockHash?: string;
+  blockNumber: string;
+  blockTimestamp?: string;
+  data: string;
+  logIndex: string;
+  removed?: boolean;
+  topics: string[];
+  transactionHash: string;
+  transactionIndex?: string;
+}
+
+interface OnchainAuditRawRow {
+  provider_record_id: string;
+  record_granularity: string;
+  source_chain_canonical: string | null;
+  raw_json: string;
+}
+
+interface OnchainBlockSample {
+  chainCanonical: string;
+  blockNumber: number;
+}
+
+interface KyberswapAuditSourceTokenInfo {
+  symbol: "USDC" | "USDT" | "WETH" | "ETH";
+}
+
+interface KyberswapAuditDestinationTokenInfo {
+  symbol: "USDC" | "ETH" | "WETH" | "CBBTC";
+}
+
+interface KyberswapAuditChainConfig {
+  chainCanonical: string;
+  rpcUrl: string;
+  metaAggregatorAddress: string;
+  sourceTokenMap: Record<string, KyberswapAuditSourceTokenInfo>;
+  destinationTokenMap: Record<string, KyberswapAuditDestinationTokenInfo>;
+}
+
+interface KyberswapAuditRuntimeConfig {
+  chains: KyberswapAuditChainConfig[];
+}
+
+interface CowswapAuditTokenInfo {
+  symbol: "USDC" | "USDT" | "WETH" | "ETH" | "CBBTC";
+}
+
+interface CowswapAuditChainConfig {
+  chainCanonical: string;
+  rpcUrl: string;
+  settlementContractAddress: string;
+  tokenMap: Record<string, CowswapAuditTokenInfo>;
+}
+
+interface CowswapAuditRuntimeConfig {
+  chains: CowswapAuditChainConfig[];
 }
 
 interface ChainflipPageInfo {
@@ -370,6 +488,33 @@ async function getRouteCount(
   return toNumber(row?.count ?? 0);
 }
 
+async function getTokenRouteCount(
+  connection: DuckDBConnection,
+  input: {
+    sourceChainCanonical: string;
+    destinationChainCanonical: string;
+    sourceAssetSymbol: string;
+    destinationAssetSymbol: string;
+  },
+): Promise<number> {
+  const row = await queryFirstPrepared<CountRow>(
+    connection,
+    `SELECT COUNT(*) AS count
+     FROM swaps_core
+     WHERE source_chain_canonical = ?
+       AND destination_chain_canonical = ?
+       AND upper(source_asset_symbol) = ?
+       AND upper(destination_asset_symbol) = ?`,
+    [
+      input.sourceChainCanonical,
+      input.destinationChainCanonical,
+      input.sourceAssetSymbol.toUpperCase(),
+      input.destinationAssetSymbol.toUpperCase(),
+    ],
+  );
+  return toNumber(row?.count ?? 0);
+}
+
 function shouldIncludeByWindow(eventAt: Date | null, window: ProviderCoverageWindow): boolean {
   if (!eventAt) {
     return false;
@@ -388,6 +533,364 @@ function toScopeCount(scopesPerProvider: number | null, totalScopes: number): nu
     return totalScopes;
   }
   return Math.max(1, Math.min(scopesPerProvider, totalScopes));
+}
+
+function toStringOrNull(value: unknown): string | null {
+  if (value === null || value === undefined) {
+    return null;
+  }
+  return nonEmptyOrNull(String(value));
+}
+
+function normalizeAddress(value: string | null | undefined): string | null {
+  if (!value) {
+    return null;
+  }
+  const normalized = value.trim().toLowerCase();
+  if (!/^0x[a-f0-9]{40}$/.test(normalized)) {
+    return null;
+  }
+  return normalized;
+}
+
+function normalizeHash(value: string | null | undefined): string | null {
+  if (!value) {
+    return null;
+  }
+  const normalized = value.trim().toLowerCase();
+  if (!/^0x[a-f0-9]{64}$/.test(normalized)) {
+    return null;
+  }
+  return normalized;
+}
+
+function normalizeSymbol(value: string | null | undefined): string | null {
+  if (!value) {
+    return null;
+  }
+  const normalized = value.trim().toUpperCase();
+  return normalized.length > 0 ? normalized : null;
+}
+
+function hexWordToUintString(hexWord: string): string | null {
+  if (!/^[0-9a-fA-F]{64}$/.test(hexWord)) {
+    return null;
+  }
+  try {
+    return BigInt(`0x${hexWord}`).toString();
+  } catch {
+    return null;
+  }
+}
+
+function hexToNumber(hex: string, fieldName: string): number {
+  if (!/^0x[0-9a-fA-F]+$/.test(hex)) {
+    throw new Error(`Invalid hex value for ${fieldName}: '${hex}'.`);
+  }
+  const parsed = Number.parseInt(hex.slice(2), 16);
+  if (!Number.isFinite(parsed) || !Number.isInteger(parsed) || parsed < 0) {
+    throw new Error(`Invalid numeric value for ${fieldName}: '${hex}'.`);
+  }
+  return parsed;
+}
+
+function numberToHex(value: number): string {
+  return `0x${value.toString(16)}`;
+}
+
+function readWord(data: string, wordIndex: number): string | null {
+  if (!data.startsWith("0x")) {
+    return null;
+  }
+  const start = 2 + wordIndex * 64;
+  const end = start + 64;
+  if (data.length < end) {
+    return null;
+  }
+  return data.slice(start, end);
+}
+
+function wordToAddress(word: string): string | null {
+  if (!/^[0-9a-fA-F]{64}$/.test(word)) {
+    return null;
+  }
+  return normalizeAddress(`0x${word.slice(24)}`);
+}
+
+function topicToAddress(topic: string | null | undefined): string | null {
+  if (!topic || !/^0x[0-9a-fA-F]{64}$/.test(topic)) {
+    return null;
+  }
+  return normalizeAddress(`0x${topic.slice(26)}`);
+}
+
+async function rpcCall<T>(
+  rpcUrl: string,
+  method: string,
+  params: unknown[],
+): Promise<T> {
+  const response = await fetchJsonWithRetry<JsonRpcResponse<T>>(
+    rpcUrl,
+    {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        jsonrpc: "2.0",
+        id: 1,
+        method,
+        params,
+      }),
+    },
+    {
+      attempts: 4,
+      initialDelayMs: 400,
+      maxDelayMs: 4_000,
+      timeoutMs: 30_000,
+    },
+  );
+
+  if (response.error) {
+    const detail = response.error.data ? ` data=${JSON.stringify(response.error.data).slice(0, 300)}` : "";
+    throw new Error(`RPC ${method} failed (${response.error.code}): ${response.error.message}${detail}`);
+  }
+  if (response.result === undefined) {
+    throw new Error(`RPC ${method} returned no result.`);
+  }
+  return response.result;
+}
+
+async function fetchLogsForExactBlock(input: {
+  rpcUrl: string;
+  address: string;
+  topic0: string;
+  blockNumber: number;
+}): Promise<EthLog[]> {
+  return rpcCall<EthLog[]>(input.rpcUrl, "eth_getLogs", [
+    {
+      address: input.address,
+      fromBlock: numberToHex(input.blockNumber),
+      toBlock: numberToHex(input.blockNumber),
+      topics: [input.topic0],
+    },
+  ]);
+}
+
+function buildKyberswapSourceTokenMap(input: {
+  usdcAddress: string;
+  usdtAddress: string;
+  wethAddress: string;
+}): Record<string, KyberswapAuditSourceTokenInfo> {
+  return {
+    [input.usdcAddress]: { symbol: "USDC" },
+    [input.usdtAddress]: { symbol: "USDT" },
+    [input.wethAddress]: { symbol: "WETH" },
+    [ETH_SENTINEL_ADDRESS]: { symbol: "ETH" },
+  };
+}
+
+function buildKyberswapDestinationTokenMap(input: {
+  usdcAddress: string;
+  wethAddress: string;
+  cbbtcAddress: string;
+}): Record<string, KyberswapAuditDestinationTokenInfo> {
+  return {
+    [input.cbbtcAddress]: { symbol: "CBBTC" },
+    [input.usdcAddress]: { symbol: "USDC" },
+    [input.wethAddress]: { symbol: "WETH" },
+    [ETH_SENTINEL_ADDRESS]: { symbol: "ETH" },
+  };
+}
+
+function buildCowswapTokenMap(input: {
+  usdcAddress: string;
+  usdtAddress: string;
+  wethAddress: string;
+  cbbtcAddress: string;
+}): Record<string, CowswapAuditTokenInfo> {
+  return {
+    [input.usdcAddress]: { symbol: "USDC" },
+    [input.usdtAddress]: { symbol: "USDT" },
+    [input.wethAddress]: { symbol: "WETH" },
+    [input.cbbtcAddress]: { symbol: "CBBTC" },
+    [ZERO_ADDRESS]: { symbol: "ETH" },
+    [ETH_SENTINEL_ADDRESS]: { symbol: "ETH" },
+  };
+}
+
+function isKyberswapTargetRoute(
+  sourceToken: KyberswapAuditSourceTokenInfo,
+  destinationToken: KyberswapAuditDestinationTokenInfo,
+): boolean {
+  if (
+    destinationToken.symbol === "CBBTC" &&
+    (sourceToken.symbol === "USDC" ||
+      sourceToken.symbol === "USDT" ||
+      sourceToken.symbol === "ETH" ||
+      sourceToken.symbol === "WETH")
+  ) {
+    return true;
+  }
+  if (sourceToken.symbol === "USDC" && (destinationToken.symbol === "ETH" || destinationToken.symbol === "WETH")) {
+    return true;
+  }
+  if ((sourceToken.symbol === "ETH" || sourceToken.symbol === "WETH") && destinationToken.symbol === "USDC") {
+    return true;
+  }
+  return false;
+}
+
+function isCowswapTargetRoute(
+  sellToken: CowswapAuditTokenInfo,
+  buyToken: CowswapAuditTokenInfo,
+): boolean {
+  if (
+    buyToken.symbol === "CBBTC" &&
+    (sellToken.symbol === "USDC" ||
+      sellToken.symbol === "USDT" ||
+      sellToken.symbol === "ETH" ||
+      sellToken.symbol === "WETH")
+  ) {
+    return true;
+  }
+  if (sellToken.symbol === "USDC" && (buyToken.symbol === "ETH" || buyToken.symbol === "WETH")) {
+    return true;
+  }
+  if ((sellToken.symbol === "ETH" || sellToken.symbol === "WETH") && buyToken.symbol === "USDC") {
+    return true;
+  }
+  return false;
+}
+
+function resolveKyberswapAuditRuntimeConfig(): KyberswapAuditRuntimeConfig {
+  const mainnetRpcUrl = nonEmptyOrNull(Bun.env.KYBERSWAP_RPC_URL ?? process.env.KYBERSWAP_RPC_URL);
+  if (!mainnetRpcUrl) {
+    throw new Error("Missing KYBERSWAP_RPC_URL environment variable.");
+  }
+
+  const baseRpcUrl =
+    nonEmptyOrNull(
+      Bun.env.KYBERSWAP_BASE_RPC_URL ??
+        process.env.KYBERSWAP_BASE_RPC_URL ??
+        Bun.env.BASE_RPC_URL ??
+        process.env.BASE_RPC_URL,
+    ) ?? DEFAULT_BASE_RPC_URL;
+
+  const mainnetMetaAggregator = normalizeAddress(
+    nonEmptyOrNull(Bun.env.KYBERSWAP_META_AGGREGATOR ?? process.env.KYBERSWAP_META_AGGREGATOR) ??
+      KYBERSWAP_DEFAULT_META_AGGREGATOR,
+  );
+  if (!mainnetMetaAggregator) {
+    throw new Error("Invalid KYBERSWAP_META_AGGREGATOR environment variable.");
+  }
+
+  const baseMetaAggregator = normalizeAddress(
+    nonEmptyOrNull(Bun.env.KYBERSWAP_BASE_META_AGGREGATOR ?? process.env.KYBERSWAP_BASE_META_AGGREGATOR) ??
+      mainnetMetaAggregator,
+  );
+  if (!baseMetaAggregator) {
+    throw new Error("Invalid KYBERSWAP_BASE_META_AGGREGATOR environment variable.");
+  }
+
+  return {
+    chains: [
+      {
+        chainCanonical: CHAIN_CANONICAL_MAINNET,
+        rpcUrl: mainnetRpcUrl,
+        metaAggregatorAddress: mainnetMetaAggregator,
+        sourceTokenMap: buildKyberswapSourceTokenMap({
+          usdcAddress: USDC_ADDRESS_MAINNET,
+          usdtAddress: USDT_ADDRESS_MAINNET,
+          wethAddress: WETH_ADDRESS_MAINNET,
+        }),
+        destinationTokenMap: buildKyberswapDestinationTokenMap({
+          usdcAddress: USDC_ADDRESS_MAINNET,
+          wethAddress: WETH_ADDRESS_MAINNET,
+          cbbtcAddress: CBBTC_ADDRESS,
+        }),
+      },
+      {
+        chainCanonical: CHAIN_CANONICAL_BASE,
+        rpcUrl: baseRpcUrl,
+        metaAggregatorAddress: baseMetaAggregator,
+        sourceTokenMap: buildKyberswapSourceTokenMap({
+          usdcAddress: USDC_ADDRESS_BASE,
+          usdtAddress: USDT_ADDRESS_BASE,
+          wethAddress: WETH_ADDRESS_BASE,
+        }),
+        destinationTokenMap: buildKyberswapDestinationTokenMap({
+          usdcAddress: USDC_ADDRESS_BASE,
+          wethAddress: WETH_ADDRESS_BASE,
+          cbbtcAddress: CBBTC_ADDRESS,
+        }),
+      },
+    ],
+  };
+}
+
+function resolveCowswapAuditRuntimeConfig(): CowswapAuditRuntimeConfig {
+  const mainnetRpcUrl = nonEmptyOrNull(
+    Bun.env.COWSWAP_RPC_URL ??
+      process.env.COWSWAP_RPC_URL ??
+      Bun.env.KYBERSWAP_RPC_URL ??
+      process.env.KYBERSWAP_RPC_URL,
+  );
+  if (!mainnetRpcUrl) {
+    throw new Error("Missing COWSWAP_RPC_URL environment variable.");
+  }
+
+  const baseRpcUrl =
+    nonEmptyOrNull(
+      Bun.env.COWSWAP_BASE_RPC_URL ??
+        process.env.COWSWAP_BASE_RPC_URL ??
+        Bun.env.BASE_RPC_URL ??
+        process.env.BASE_RPC_URL,
+    ) ?? DEFAULT_BASE_RPC_URL;
+
+  const mainnetSettlementContract = normalizeAddress(
+    nonEmptyOrNull(Bun.env.COWSWAP_SETTLEMENT_CONTRACT ?? process.env.COWSWAP_SETTLEMENT_CONTRACT) ??
+      COWSWAP_DEFAULT_SETTLEMENT_CONTRACT,
+  );
+  if (!mainnetSettlementContract) {
+    throw new Error("Invalid COWSWAP_SETTLEMENT_CONTRACT environment variable.");
+  }
+
+  const baseSettlementContract = normalizeAddress(
+    nonEmptyOrNull(Bun.env.COWSWAP_BASE_SETTLEMENT_CONTRACT ?? process.env.COWSWAP_BASE_SETTLEMENT_CONTRACT) ??
+      mainnetSettlementContract,
+  );
+  if (!baseSettlementContract) {
+    throw new Error("Invalid COWSWAP_BASE_SETTLEMENT_CONTRACT environment variable.");
+  }
+
+  return {
+    chains: [
+      {
+        chainCanonical: CHAIN_CANONICAL_MAINNET,
+        rpcUrl: mainnetRpcUrl,
+        settlementContractAddress: mainnetSettlementContract,
+        tokenMap: buildCowswapTokenMap({
+          usdcAddress: USDC_ADDRESS_MAINNET,
+          usdtAddress: USDT_ADDRESS_MAINNET,
+          wethAddress: WETH_ADDRESS_MAINNET,
+          cbbtcAddress: CBBTC_ADDRESS,
+        }),
+      },
+      {
+        chainCanonical: CHAIN_CANONICAL_BASE,
+        rpcUrl: baseRpcUrl,
+        settlementContractAddress: baseSettlementContract,
+        tokenMap: buildCowswapTokenMap({
+          usdcAddress: USDC_ADDRESS_BASE,
+          usdtAddress: USDT_ADDRESS_BASE,
+          wethAddress: WETH_ADDRESS_BASE,
+          cbbtcAddress: CBBTC_ADDRESS,
+        }),
+      },
+    ],
+  };
 }
 
 function buildRelayScopes(): RelayScope[] {
@@ -413,6 +916,212 @@ function buildRelayScopes(): RelayScope[] {
     }
   }
   return scopes;
+}
+
+function buildLifiScopes(): LifiScope[] {
+  const chainConfigs = [
+    {
+      chainId: CHAIN_ID_MAINNET,
+      chainCanonical: CHAIN_CANONICAL_MAINNET,
+      usdcAddress: USDC_ADDRESS_MAINNET,
+      usdtAddress: USDT_ADDRESS_MAINNET,
+      wethAddress: WETH_ADDRESS_MAINNET,
+    },
+    {
+      chainId: CHAIN_ID_BASE,
+      chainCanonical: CHAIN_CANONICAL_BASE,
+      usdcAddress: USDC_ADDRESS_BASE,
+      usdtAddress: USDT_ADDRESS_BASE,
+      wethAddress: WETH_ADDRESS_BASE,
+    },
+  ];
+
+  const scopes: LifiScope[] = [];
+  for (const chain of chainConfigs) {
+    const cbbtcRoutes: Array<Pick<LifiScope, "sourceTokenSymbol" | "sourceTokenAddress">> = [
+      { sourceTokenSymbol: "USDC", sourceTokenAddress: chain.usdcAddress },
+      { sourceTokenSymbol: "USDT", sourceTokenAddress: chain.usdtAddress },
+      { sourceTokenSymbol: "WETH", sourceTokenAddress: chain.wethAddress },
+      { sourceTokenSymbol: "ETH", sourceTokenAddress: ZERO_ADDRESS },
+    ];
+
+    for (const route of cbbtcRoutes) {
+      scopes.push({
+        key: `${chain.chainId}:${route.sourceTokenSymbol}->CBBTC`,
+        sourceChainId: chain.chainId,
+        destinationChainId: chain.chainId,
+        sourceChainCanonical: chain.chainCanonical,
+        destinationChainCanonical: chain.chainCanonical,
+        sourceTokenSymbol: route.sourceTokenSymbol,
+        sourceTokenAddress: route.sourceTokenAddress,
+        destinationTokenSymbol: "CBBTC",
+        destinationTokenAddress: CBBTC_ADDRESS,
+      });
+    }
+
+    scopes.push({
+      key: `${chain.chainId}:USDC->ETH`,
+      sourceChainId: chain.chainId,
+      destinationChainId: chain.chainId,
+      sourceChainCanonical: chain.chainCanonical,
+      destinationChainCanonical: chain.chainCanonical,
+      sourceTokenSymbol: "USDC",
+      sourceTokenAddress: chain.usdcAddress,
+      destinationTokenSymbol: "ETH",
+      destinationTokenAddress: ZERO_ADDRESS,
+    });
+    scopes.push({
+      key: `${chain.chainId}:ETH->USDC`,
+      sourceChainId: chain.chainId,
+      destinationChainId: chain.chainId,
+      sourceChainCanonical: chain.chainCanonical,
+      destinationChainCanonical: chain.chainCanonical,
+      sourceTokenSymbol: "ETH",
+      sourceTokenAddress: ZERO_ADDRESS,
+      destinationTokenSymbol: "USDC",
+      destinationTokenAddress: chain.usdcAddress,
+    });
+  }
+
+  return scopes;
+}
+
+function decodeKyberswapSwappedEvent(logData: string): {
+  srcToken: string;
+  dstToken: string;
+} | null {
+  const srcTokenWord = readWord(logData, 1);
+  const dstTokenWord = readWord(logData, 2);
+  if (!srcTokenWord || !dstTokenWord) {
+    return null;
+  }
+  const srcToken = wordToAddress(srcTokenWord);
+  const dstToken = wordToAddress(dstTokenWord);
+  if (!srcToken || !dstToken) {
+    return null;
+  }
+  return { srcToken, dstToken };
+}
+
+function decodeDynamicBytes(data: string, offsetBytes: number): string | null {
+  if (!data.startsWith("0x") || offsetBytes < 0) {
+    return null;
+  }
+  const payload = data.slice(2);
+  const lengthWordStart = offsetBytes * 2;
+  const lengthWordEnd = lengthWordStart + 64;
+  if (payload.length < lengthWordEnd) {
+    return null;
+  }
+  const lengthWord = payload.slice(lengthWordStart, lengthWordEnd);
+  if (!/^[0-9a-fA-F]{64}$/.test(lengthWord)) {
+    return null;
+  }
+
+  let bytesLength: number;
+  try {
+    const parsed = BigInt(`0x${lengthWord}`);
+    if (parsed > BigInt(Number.MAX_SAFE_INTEGER)) {
+      return null;
+    }
+    bytesLength = Number(parsed);
+  } catch {
+    return null;
+  }
+
+  const dataStart = lengthWordEnd;
+  const dataEnd = dataStart + bytesLength * 2;
+  if (payload.length < dataEnd) {
+    return null;
+  }
+  const bytesHex = payload.slice(dataStart, dataEnd).toLowerCase();
+  if (!/^[0-9a-f]*$/.test(bytesHex)) {
+    return null;
+  }
+  return `0x${bytesHex}`;
+}
+
+function decodeCowswapTradeEvent(log: EthLog): {
+  sellToken: string;
+  buyToken: string;
+} | null {
+  const sellTokenWord = readWord(log.data, 0);
+  const buyTokenWord = readWord(log.data, 1);
+  const orderUidOffsetWord = readWord(log.data, 5);
+  if (!sellTokenWord || !buyTokenWord || !orderUidOffsetWord) {
+    return null;
+  }
+
+  const sellToken = wordToAddress(sellTokenWord);
+  const buyToken = wordToAddress(buyTokenWord);
+  if (!sellToken || !buyToken) {
+    return null;
+  }
+
+  try {
+    const offset = Number(BigInt(`0x${orderUidOffsetWord}`));
+    if (Number.isFinite(offset) && offset >= 0) {
+      decodeDynamicBytes(log.data, offset);
+    }
+  } catch {
+    // ignore; orderUid is not required for audit candidate generation
+  }
+
+  return { sellToken, buyToken };
+}
+
+function parseBlockNumberFromRawJson(rawJson: string): number | null {
+  try {
+    const parsed = JSON.parse(rawJson) as { blockNumber?: string | null };
+    const blockNumber = nonEmptyOrNull(parsed.blockNumber);
+    return blockNumber ? hexToNumber(blockNumber, "raw.blockNumber") : null;
+  } catch {
+    return null;
+  }
+}
+
+async function loadOnchainBlockSamples(input: {
+  connection: DuckDBConnection;
+  providerKey: ProviderKey;
+  window: ProviderCoverageWindow;
+  scopesPerProvider: number | null;
+  rng: () => number;
+}): Promise<OnchainBlockSample[]> {
+  const rows = await queryPrepared<OnchainAuditRawRow>(
+    input.connection,
+    `SELECT
+       sc.provider_record_id,
+       sc.record_granularity,
+       sc.source_chain_canonical,
+       sr.raw_json
+     FROM swaps_core sc
+     JOIN swaps_raw sr
+       ON sr.normalized_id = sc.normalized_id
+      AND sr.raw_hash = sc.raw_hash_latest
+     WHERE sc.provider_key = ?
+       AND sc.event_at >= ?
+       AND sc.event_at <= ?`,
+    [input.providerKey, input.window.start, input.window.end],
+  );
+
+  const blocks = new Map<string, OnchainBlockSample>();
+  for (const row of rows) {
+    const chainCanonical = nonEmptyOrNull(row.source_chain_canonical);
+    const blockNumber = parseBlockNumberFromRawJson(row.raw_json);
+    if (!chainCanonical || blockNumber === null) {
+      continue;
+    }
+    blocks.set(`${chainCanonical}:${blockNumber}`, {
+      chainCanonical,
+      blockNumber,
+    });
+  }
+
+  return pickRandomItems(
+    [...blocks.values()],
+    toScopeCount(input.scopesPerProvider, blocks.size),
+    input.rng,
+  );
 }
 
 function firstTxWithHash(txs: RelayRequestTx[] | null | undefined): RelayRequestTx | null {
@@ -611,6 +1320,394 @@ async function collectRelayCandidates(input: {
       apiRowsScanned: scopeRowsScanned,
       apiTotal: null,
       dbRows,
+    });
+  }
+
+  return {
+    candidates: [...candidates.values()],
+    scopes: scopeReports,
+    apiRequests,
+  };
+}
+
+interface LifiAuditWindowChunk {
+  startTimestamp: number;
+  endTimestamp: number;
+  depth: number;
+}
+
+function splitLifiAuditWindowChunk(
+  chunk: LifiAuditWindowChunk,
+): { older: LifiAuditWindowChunk; newer: LifiAuditWindowChunk } | null {
+  if (chunk.depth >= LIFI_MAX_WINDOW_SPLIT_DEPTH) {
+    return null;
+  }
+  if (chunk.endTimestamp <= chunk.startTimestamp) {
+    return null;
+  }
+  const spanSeconds = chunk.endTimestamp - chunk.startTimestamp + 1;
+  if (spanSeconds <= LIFI_MIN_WINDOW_SPLIT_SECONDS) {
+    return null;
+  }
+
+  const midpoint = Math.floor((chunk.startTimestamp + chunk.endTimestamp) / 2);
+  if (midpoint <= chunk.startTimestamp || midpoint >= chunk.endTimestamp) {
+    return null;
+  }
+
+  return {
+    older: {
+      startTimestamp: chunk.startTimestamp,
+      endTimestamp: midpoint,
+      depth: chunk.depth + 1,
+    },
+    newer: {
+      startTimestamp: midpoint + 1,
+      endTimestamp: chunk.endTimestamp,
+      depth: chunk.depth + 1,
+    },
+  };
+}
+
+function buildLifiTransfersUrl(
+  scope: LifiScope,
+  chunk: LifiAuditWindowChunk,
+): string {
+  const url = new URL(LIFI_SOURCE_ENDPOINT);
+  url.searchParams.set("fromChain", scope.sourceChainId);
+  url.searchParams.set("toChain", scope.destinationChainId);
+  url.searchParams.set("fromToken", scope.sourceTokenAddress);
+  url.searchParams.set("toToken", scope.destinationTokenAddress);
+  url.searchParams.set("fromTimestamp", String(chunk.startTimestamp));
+  url.searchParams.set("toTimestamp", String(chunk.endTimestamp));
+  return url.toString();
+}
+
+function deriveLifiEventAt(record: LifiTransferRecord): Date | null {
+  return (
+    parseUnixSecondsOrNull(record.sending?.timestamp) ??
+    parseUnixSecondsOrNull(record.receiving?.timestamp)
+  );
+}
+
+function deriveLifiProviderRecordId(record: LifiTransferRecord): string | null {
+  return (
+    nonEmptyOrNull(record.transactionId) ??
+    normalizeHash(record.sending?.txHash ?? null) ??
+    normalizeHash(record.receiving?.txHash ?? null)
+  );
+}
+
+async function collectLifiCandidates(input: {
+  connection: DuckDBConnection;
+  window: ProviderCoverageWindow;
+  options: ProviderIntegrityAuditOptions;
+  rng: () => number;
+}): Promise<CollectorResult> {
+  const allScopes = buildLifiScopes();
+  const selectedScopes = pickRandomItems(
+    allScopes,
+    toScopeCount(input.options.scopesPerProvider, allScopes.length),
+    input.rng,
+  );
+
+  const candidates = new Map<string, IntegrityCandidate>();
+  const scopeReports: ScopeProbe[] = [];
+  let apiRequests = 0;
+
+  for (const scope of selectedScopes) {
+    const queue: LifiAuditWindowChunk[] = [
+      {
+        startTimestamp: toUnixSeconds(input.window.start),
+        endTimestamp: toUnixSeconds(input.window.end),
+        depth: 0,
+      },
+    ];
+    const seenWindowKeys = new Set<string>();
+    let pages = 0;
+    let scopeRowsScanned = 0;
+
+    while (queue.length > 0 && pages < input.options.maxPages) {
+      const chunk = queue.shift();
+      if (!chunk) {
+        continue;
+      }
+      const windowKey = `${chunk.startTimestamp}-${chunk.endTimestamp}-d${chunk.depth}`;
+      if (seenWindowKeys.has(windowKey)) {
+        continue;
+      }
+      seenWindowKeys.add(windowKey);
+
+      const response = await fetchJsonWithRetry<LifiTransfersResponse>(
+        buildLifiTransfersUrl(scope, chunk),
+        {
+          method: "GET",
+          headers: {
+            Accept: "application/json",
+          },
+        },
+        {
+          attempts: 4,
+          initialDelayMs: 400,
+          maxDelayMs: 4_000,
+          timeoutMs: 30_000,
+        },
+      );
+      apiRequests += 1;
+      pages += 1;
+
+      const transfers = response.transfers ?? [];
+      scopeRowsScanned += transfers.length;
+
+      for (const transfer of transfers) {
+        const providerRecordId = deriveLifiProviderRecordId(transfer);
+        if (!providerRecordId) {
+          continue;
+        }
+        if (mapLifiStatus(transfer.status, transfer.substatus) !== "success") {
+          continue;
+        }
+
+        const sourceChainCanonical = canonicalizeChain({
+          provider: "lifi",
+          rawChainId: transfer.sending?.chainId ?? transfer.sending?.token?.chainId ?? null,
+        }).canonical;
+        const destinationChainCanonical = canonicalizeChain({
+          provider: "lifi",
+          rawChainId: transfer.receiving?.chainId ?? transfer.receiving?.token?.chainId ?? null,
+        }).canonical;
+        const sourceAssetSymbol =
+          normalizeSymbol(transfer.sending?.token?.symbol ?? null) ?? scope.sourceTokenSymbol;
+        const destinationAssetSymbol =
+          normalizeSymbol(transfer.receiving?.token?.symbol ?? null) ?? scope.destinationTokenSymbol;
+
+        if (
+          !isSwapRowWithinIngestScope({
+            source_chain_canonical: sourceChainCanonical,
+            destination_chain_canonical: destinationChainCanonical,
+            source_asset_symbol: sourceAssetSymbol,
+            destination_asset_symbol: destinationAssetSymbol,
+            source_asset_id: toStringOrNull(transfer.sending?.token?.address ?? null),
+            destination_asset_id: toStringOrNull(transfer.receiving?.token?.address ?? null),
+          })
+        ) {
+          continue;
+        }
+
+        const sourceTokenAddress =
+          normalizeAddress(transfer.sending?.token?.address ?? null) ??
+          (scope.sourceTokenSymbol === "ETH" ? ZERO_ADDRESS : null);
+        const destinationTokenAddress =
+          normalizeAddress(transfer.receiving?.token?.address ?? null) ??
+          (scope.destinationTokenSymbol === "ETH" ? ZERO_ADDRESS : null);
+
+        if (
+          sourceChainCanonical !== scope.sourceChainCanonical ||
+          destinationChainCanonical !== scope.destinationChainCanonical ||
+          sourceAssetSymbol !== scope.sourceTokenSymbol ||
+          destinationAssetSymbol !== scope.destinationTokenSymbol ||
+          sourceTokenAddress !== scope.sourceTokenAddress ||
+          destinationTokenAddress !== scope.destinationTokenAddress
+        ) {
+          continue;
+        }
+
+        const eventAt = deriveLifiEventAt(transfer);
+        if (!shouldIncludeByWindow(eventAt, input.window)) {
+          continue;
+        }
+
+        const key = `transfer|${providerRecordId}`;
+        if (!candidates.has(key)) {
+          candidates.set(key, {
+            providerRecordId,
+            recordGranularity: "transfer",
+            eventAt,
+            scopeKey: scope.key,
+          });
+        }
+      }
+
+      if (transfers.length >= LIFI_RESPONSE_CAP) {
+        const split = splitLifiAuditWindowChunk(chunk);
+        if (split) {
+          queue.unshift(split.newer);
+          queue.unshift(split.older);
+        }
+      }
+    }
+
+    const dbRows = await getTokenRouteCount(input.connection, {
+      sourceChainCanonical: scope.sourceChainCanonical,
+      destinationChainCanonical: scope.destinationChainCanonical,
+      sourceAssetSymbol: scope.sourceTokenSymbol,
+      destinationAssetSymbol: scope.destinationTokenSymbol,
+    });
+    scopeReports.push({
+      scopeKey: scope.key,
+      apiRowsScanned: scopeRowsScanned,
+      apiTotal: null,
+      dbRows,
+    });
+  }
+
+  return {
+    candidates: [...candidates.values()],
+    scopes: scopeReports,
+    apiRequests,
+  };
+}
+
+async function collectKyberswapCandidates(input: {
+  connection: DuckDBConnection;
+  window: ProviderCoverageWindow;
+  options: ProviderIntegrityAuditOptions;
+  rng: () => number;
+}): Promise<CollectorResult> {
+  const runtimeConfig = resolveKyberswapAuditRuntimeConfig();
+  const sampledBlocks = await loadOnchainBlockSamples({
+    connection: input.connection,
+    providerKey: "kyberswap",
+    window: input.window,
+    scopesPerProvider: input.options.scopesPerProvider,
+    rng: input.rng,
+  });
+
+  const candidates = new Map<string, IntegrityCandidate>();
+  const scopeReports: ScopeProbe[] = [];
+  let apiRequests = 0;
+
+  for (const block of sampledBlocks) {
+    const chain = runtimeConfig.chains.find((candidate) => candidate.chainCanonical === block.chainCanonical);
+    if (!chain) {
+      continue;
+    }
+
+    const logs = await fetchLogsForExactBlock({
+      rpcUrl: chain.rpcUrl,
+      address: chain.metaAggregatorAddress,
+      topic0: KYBERSWAP_SWAPPED_TOPIC0,
+      blockNumber: block.blockNumber,
+    });
+    apiRequests += 1;
+
+    let scopeRowsScanned = 0;
+    for (const log of logs) {
+      if (log.removed) {
+        continue;
+      }
+      const decoded = decodeKyberswapSwappedEvent(log.data);
+      if (!decoded) {
+        continue;
+      }
+
+      const sourceToken = chain.sourceTokenMap[decoded.srcToken] ?? null;
+      const destinationToken = chain.destinationTokenMap[decoded.dstToken] ?? null;
+      if (!sourceToken || !destinationToken || !isKyberswapTargetRoute(sourceToken, destinationToken)) {
+        continue;
+      }
+
+      const txHash = normalizeHash(log.transactionHash);
+      const logIndex = nonEmptyOrNull(log.logIndex);
+      if (!txHash || !logIndex) {
+        continue;
+      }
+
+      scopeRowsScanned += 1;
+      const providerRecordId = `${chain.chainCanonical}:${txHash}:${hexToNumber(logIndex, "log.logIndex")}`;
+      candidates.set(`swap_event|${providerRecordId}`, {
+        providerRecordId,
+        recordGranularity: "swap_event",
+        eventAt: null,
+        scopeKey: `${chain.chainCanonical}:block:${block.blockNumber}`,
+      });
+    }
+
+    scopeReports.push({
+      scopeKey: `${chain.chainCanonical}:block:${block.blockNumber}`,
+      apiRowsScanned: scopeRowsScanned,
+      apiTotal: scopeRowsScanned,
+      dbRows: null,
+    });
+  }
+
+  return {
+    candidates: [...candidates.values()],
+    scopes: scopeReports,
+    apiRequests,
+  };
+}
+
+async function collectCowswapCandidates(input: {
+  connection: DuckDBConnection;
+  window: ProviderCoverageWindow;
+  options: ProviderIntegrityAuditOptions;
+  rng: () => number;
+}): Promise<CollectorResult> {
+  const runtimeConfig = resolveCowswapAuditRuntimeConfig();
+  const sampledBlocks = await loadOnchainBlockSamples({
+    connection: input.connection,
+    providerKey: "cowswap",
+    window: input.window,
+    scopesPerProvider: input.options.scopesPerProvider,
+    rng: input.rng,
+  });
+
+  const candidates = new Map<string, IntegrityCandidate>();
+  const scopeReports: ScopeProbe[] = [];
+  let apiRequests = 0;
+
+  for (const block of sampledBlocks) {
+    const chain = runtimeConfig.chains.find((candidate) => candidate.chainCanonical === block.chainCanonical);
+    if (!chain) {
+      continue;
+    }
+
+    const logs = await fetchLogsForExactBlock({
+      rpcUrl: chain.rpcUrl,
+      address: chain.settlementContractAddress,
+      topic0: COWSWAP_TRADE_TOPIC0,
+      blockNumber: block.blockNumber,
+    });
+    apiRequests += 1;
+
+    let scopeRowsScanned = 0;
+    for (const log of logs) {
+      if (log.removed) {
+        continue;
+      }
+      const decoded = decodeCowswapTradeEvent(log);
+      if (!decoded) {
+        continue;
+      }
+
+      const sellToken = chain.tokenMap[decoded.sellToken] ?? null;
+      const buyToken = chain.tokenMap[decoded.buyToken] ?? null;
+      if (!sellToken || !buyToken || !isCowswapTargetRoute(sellToken, buyToken)) {
+        continue;
+      }
+
+      const txHash = normalizeHash(log.transactionHash);
+      const logIndex = nonEmptyOrNull(log.logIndex);
+      if (!txHash || !logIndex) {
+        continue;
+      }
+
+      scopeRowsScanned += 1;
+      const providerRecordId = `${chain.chainCanonical}:${txHash}:${hexToNumber(logIndex, "log.logIndex")}`;
+      candidates.set(`trade_event|${providerRecordId}`, {
+        providerRecordId,
+        recordGranularity: "trade_event",
+        eventAt: null,
+        scopeKey: `${chain.chainCanonical}:block:${block.blockNumber}`,
+      });
+    }
+
+    scopeReports.push({
+      scopeKey: `${chain.chainCanonical}:block:${block.blockNumber}`,
+      apiRowsScanned: scopeRowsScanned,
+      apiTotal: scopeRowsScanned,
+      dbRows: null,
     });
   }
 
@@ -1723,6 +2820,13 @@ function computeWilsonLowerBound(matches: number, sampled: number, z = 1.96): nu
   return Math.max(0, (center - margin) / denominator);
 }
 
+class UnsupportedIntegritySamplerError extends Error {
+  constructor(providerKey: ProviderKey) {
+    super(`Integrity API sampler is not implemented for provider '${providerKey}' yet.`);
+    this.name = "UnsupportedIntegritySamplerError";
+  }
+}
+
 async function collectCandidatesForProvider(input: {
   providerKey: ProviderKey;
   connection: DuckDBConnection;
@@ -1730,6 +2834,15 @@ async function collectCandidatesForProvider(input: {
   options: ProviderIntegrityAuditOptions;
   rng: () => number;
 }): Promise<CollectorResult> {
+  if (input.providerKey === "lifi") {
+    return collectLifiCandidates({
+      connection: input.connection,
+      window: input.window,
+      options: input.options,
+      rng: input.rng,
+    });
+  }
+
   if (input.providerKey === "relay") {
     return collectRelayCandidates({
       connection: input.connection,
@@ -1772,15 +2885,49 @@ async function collectCandidatesForProvider(input: {
     });
   }
 
-  throw new Error(
-    `Integrity API sampler is not implemented for provider '${input.providerKey}' yet.`,
-  );
+  if (input.providerKey === "kyberswap") {
+    return collectKyberswapCandidates({
+      connection: input.connection,
+      window: input.window,
+      options: input.options,
+      rng: input.rng,
+    });
+  }
+
+  if (input.providerKey === "cowswap") {
+    return collectCowswapCandidates({
+      connection: input.connection,
+      window: input.window,
+      options: input.options,
+      rng: input.rng,
+    });
+  }
+
+  throw new UnsupportedIntegritySamplerError(input.providerKey);
 }
 
 function sortByEventAtDesc(a: IntegrityCandidate, b: IntegrityCandidate): number {
   const timeA = a.eventAt?.getTime() ?? 0;
   const timeB = b.eventAt?.getTime() ?? 0;
   return timeB - timeA;
+}
+
+function emptyReconciliationReport(): ProviderReconciliationReport {
+  return {
+    severity: "ok",
+    coreRowsMissingRaw: 0,
+    orphanRawRows: 0,
+    staleRawHashLatestRows: 0,
+    duplicateProviderRecordRows: 0,
+    rowsOlderThanFloor: 0,
+    outOfScopeRows: 0,
+    nullEventAtRows: 0,
+    gapDays: [],
+    maxConsecutiveGapDays: 0,
+    recentDailyCounts: [],
+    topRecentRoutes: [],
+    issues: [],
+  };
 }
 
 export async function runProviderIntegrityAudit(
@@ -1795,6 +2942,17 @@ export async function runProviderIntegrityAudit(
     try {
       const bounds = await getProviderBounds(db.connection);
       const swaps = toNumber(bounds.swaps);
+      const window = swaps > 0
+        ? deriveCoverageWindow(bounds, options.windowDays)
+        : { start: new Date(0), end: new Date(0) };
+      const reconciliation = swaps > 0
+        ? await runProviderReconciliation({
+          providerKey,
+          connection: db.connection,
+          windowStart: window.start,
+          windowEnd: window.end,
+        })
+        : emptyReconciliationReport();
 
       if (swaps <= 0) {
         reports.push({
@@ -1802,8 +2960,9 @@ export async function runProviderIntegrityAudit(
           dbSwaps: 0,
           dbOldestEventAt: null,
           dbNewestEventAt: null,
-          windowStart: new Date(0).toISOString(),
-          windowEnd: new Date(0).toISOString(),
+          windowStart: window.start.toISOString(),
+          windowEnd: window.end.toISOString(),
+          reconciliation,
           apiRequests: 0,
           candidatesCollected: 0,
           sampled: 0,
@@ -1820,7 +2979,6 @@ export async function runProviderIntegrityAudit(
       }
 
       const presenceIndex = await loadPresenceIndex(db.connection);
-      const window = deriveCoverageWindow(bounds, options.windowDays);
       const rng = createMulberry32(hashSeed(options.seed, providerKey));
 
       try {
@@ -1871,6 +3029,7 @@ export async function runProviderIntegrityAudit(
           dbNewestEventAt: parseDateOrNull(bounds.newest_event_at)?.toISOString() ?? null,
           windowStart: window.start.toISOString(),
           windowEnd: window.end.toISOString(),
+          reconciliation,
           apiRequests: collected.apiRequests,
           candidatesCollected: collected.candidates.length,
           sampled,
@@ -1884,6 +3043,10 @@ export async function runProviderIntegrityAudit(
           error: null,
         });
       } catch (error) {
+        const notes =
+          error instanceof UnsupportedIntegritySamplerError
+            ? [error.message]
+            : [];
         reports.push({
           providerKey,
           dbSwaps: swaps,
@@ -1891,6 +3054,7 @@ export async function runProviderIntegrityAudit(
           dbNewestEventAt: parseDateOrNull(bounds.newest_event_at)?.toISOString() ?? null,
           windowStart: window.start.toISOString(),
           windowEnd: window.end.toISOString(),
+          reconciliation,
           apiRequests: 0,
           candidatesCollected: 0,
           sampled: 0,
@@ -1900,8 +3064,13 @@ export async function runProviderIntegrityAudit(
           wilsonLowerBound95: null,
           scopes: [],
           missingSamples: [],
-          notes: [],
-          error: error instanceof Error ? error.message : String(error),
+          notes,
+          error:
+            error instanceof UnsupportedIntegritySamplerError
+              ? null
+              : error instanceof Error
+                ? error.message
+                : String(error),
         });
       }
     } finally {

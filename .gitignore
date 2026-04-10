@@ -13,6 +13,10 @@ data/analytics/*
 !data/analytics/execution-quality/
 !data/analytics/execution-quality/**
 
+# WETH is folded into ETH views; do not track obsolete WETH-only frontend artifacts.
+data/analytics/execution-quality/**/eip155_*__weth__to__*/
+data/analytics/execution-quality/**/eip155_*__*__to__eip155_*__weth/
+
 # local databases/caches
 *.duckdb
 *.duckdb.wal

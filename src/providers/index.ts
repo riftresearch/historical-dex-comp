@@ -1,6 +1,7 @@
 import type { ProviderKey } from "../domain/provider-key";
 import { PROVIDER_KEYS } from "../domain/provider-key";
 import { chainflipProviderAdapter } from "./chainflip/adapter";
+import { cowswapProviderAdapter } from "./cowswap/adapter";
 import { gardenProviderAdapter } from "./garden/adapter";
 import { kyberswapProviderAdapter } from "./kyberswap/adapter";
 import { lifiProviderAdapter } from "./lifi/adapter";
@@ -16,6 +17,7 @@ const ADAPTERS: Partial<Record<ProviderKey, ProviderAdapter>> = {
   chainflip: chainflipProviderAdapter,
   garden: gardenProviderAdapter,
   nearintents: nearintentsProviderAdapter,
+  cowswap: cowswapProviderAdapter,
   kyberswap: kyberswapProviderAdapter,
 };
 

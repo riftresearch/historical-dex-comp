@@ -1,0 +1,102 @@
+{
+  "generatedAt": "2026-03-05T06:57:15.347Z",
+  "provider": "lifi",
+  "tokenPath": {
+    "sourceChainCanonical": "bitcoin:mainnet",
+    "sourceTokenSymbol": "BTC",
+    "destinationChainCanonical": "eip155:1",
+    "destinationTokenSymbol": "USDT"
+  },
+  "window": {
+    "startAtIso": "2026-02-03T06:54:54.000Z",
+    "endAtIso": "2026-03-05T06:54:54.000Z"
+  },
+  "notionalUsdFilter": {
+    "min": null,
+    "max": null,
+    "minInclusive": false,
+    "maxInclusive": false,
+    "minExclusive": null,
+    "maxExclusive": null,
+    "minInclusiveValue": null,
+    "maxInclusiveValue": null
+  },
+  "signConvention": {
+    "positiveBps": "output USD < input USD (worse for user)",
+    "negativeBps": "output USD > input USD (better for user)"
+  },
+  "totals": {
+    "matchedTrades": 0,
+    "pricedTrades": 0,
+    "skippedInvalidTimestamp": 0,
+    "skippedMissingAmount": 0,
+    "skippedNonPositiveAmount": 0,
+    "skippedMissingPrice": 0,
+    "skippedOutsideNotionalBand": 0,
+    "pricedMatchRatePct": null
+  },
+  "outcomeSummary": {
+    "betterTrades": 0,
+    "worseTrades": 0,
+    "flatTrades": 0,
+    "betterRatePct": null,
+    "worseRatePct": null,
+    "flatRatePct": null
+  },
+  "bpsSummary": {
+    "count": 0,
+    "mean": null,
+    "median": null,
+    "stdDev": null,
+    "meanAbs": null,
+    "min": null,
+    "p10": null,
+    "p25": null,
+    "p50": null,
+    "p75": null,
+    "p90": null,
+    "p95": null,
+    "p99": null,
+    "iqr": null,
+    "max": null
+  },
+  "usdSummary": {
+    "totalInputUsd": 0,
+    "totalOutputUsd": 0,
+    "netUsdDelta": 0,
+    "weightedShortfallBps": null,
+    "meanInputUsd": null,
+    "medianInputUsd": null,
+    "meanOutputUsd": null,
+    "medianOutputUsd": null,
+    "meanUsdDelta": null,
+    "medianUsdDelta": null
+  },
+  "histogramBucketBps": 10,
+  "distribution": [],
+  "output": {
+    "directory": "/home/alpinevm/Development/rift/historical-dex-comp/data/analytics/execution-quality/lifi/bitcoin_mainnet__btc__to__eip155_1__usdt",
+    "tradesCsv": "/home/alpinevm/Development/rift/historical-dex-comp/data/analytics/execution-quality/lifi/bitcoin_mainnet__btc__to__eip155_1__usdt/trades.csv",
+    "distributionCsv": "/home/alpinevm/Development/rift/historical-dex-comp/data/analytics/execution-quality/lifi/bitcoin_mainnet__btc__to__eip155_1__usdt/distribution.csv",
+    "summaryJson": "/home/alpinevm/Development/rift/historical-dex-comp/data/analytics/execution-quality/lifi/bitcoin_mainnet__btc__to__eip155_1__usdt/summary.json"
+  },
+  "pricingSource": {
+    "venue": "coinbase",
+    "endpoint": "GET /products/{product_id}/candles",
+    "granularitySeconds": 60,
+    "priceFieldUsed": "close",
+    "cacheDbPath": "/home/alpinevm/Development/rift/historical-dex-comp/data/analytics/coinbase-price-cache.sqlite",
+    "stablecoinPegMode": "usd_1",
+    "stablecoinUsdPegSymbols": [
+      "DAI",
+      "FRAX",
+      "PYUSD",
+      "USDC",
+      "USDC.E",
+      "USDCE",
+      "USDE",
+      "USDT",
+      "USDT0"
+    ]
+  }
+}

@@ -1,2 +1,0 @@
-normalized_id,provider_record_id,event_at,event_minute_ts,source_chain_canonical,destination_chain_canonical,source_token_symbol,destination_token_symbol,amount_in,amount_out,source_price_usd,destination_price_usd,input_usd,output_usd,implementation_shortfall_bps
-0x8ffca92bd0cb07da86bfef890e3ba0e6ad2d236e23fbfadfc56b4d9e92c3bdb8,0x8ffca92bd0cb07da86bfef890e3ba0e6ad2d236e23fbfadfc56b4d9e92c3bdb8,2026-02-04T16:28:23.000Z,1770222480,eip155:1,eip155:1,WETH,CBBTC,4.628489394649,0.13286127,2131.11,73978.92,9863.82003383,9828.93326443,35.368416

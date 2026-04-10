@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-02-25T03:14:25.786Z",
+  "generatedAt": "2026-04-08T17:29:18.427Z",
   "provider": "relay",
   "tokenPath": {
     "sourceChainCanonical": "bitcoin:mainnet",
@@ -8,8 +8,8 @@
     "destinationTokenSymbol": "ETH"
   },
   "window": {
-    "startAtIso": "2026-01-21T00:00:00.000Z",
-    "endAtIso": "2026-02-21T23:59:59.999Z"
+    "startAtIso": "2026-03-09T17:26:00.000Z",
+    "endAtIso": "2026-04-08T17:26:00.000Z"
   },
   "notionalUsdFilter": {
     "min": null,
@@ -26,278 +26,258 @@
     "negativeBps": "output USD > input USD (better for user)"
   },
   "totals": {
-    "matchedTrades": 1091,
-    "pricedTrades": 1091,
+    "matchedTrades": 327,
+    "pricedTrades": 326,
     "skippedInvalidTimestamp": 0,
     "skippedMissingAmount": 0,
     "skippedNonPositiveAmount": 0,
-    "skippedMissingPrice": 0,
+    "skippedMissingPrice": 1,
     "skippedOutsideNotionalBand": 0,
-    "pricedMatchRatePct": 100
+    "pricedMatchRatePct": 99.6942
   },
   "outcomeSummary": {
-    "betterTrades": 0,
-    "worseTrades": 1091,
+    "betterTrades": 5,
+    "worseTrades": 321,
     "flatTrades": 0,
-    "betterRatePct": 0,
-    "worseRatePct": 100,
+    "betterRatePct": 1.5337,
+    "worseRatePct": 98.4663,
     "flatRatePct": 0
   },
   "bpsSummary": {
-    "count": 1091,
-    "mean": 279.761445,
-    "median": 258.15116,
-    "stdDev": 157.131256,
-    "meanAbs": 279.761445,
-    "min": 13.968107,
-    "p10": 133.701102,
-    "p25": 182.028566,
-    "p50": 258.15116,
-    "p75": 308.573359,
-    "p90": 438.291907,
-    "p95": 535.002461,
-    "p99": 928.013209,
-    "iqr": 126.544793,
-    "max": 1536.636284
+    "count": 326,
+    "mean": 370.042904,
+    "median": 229.224883,
+    "stdDev": 780.50147,
+    "meanAbs": 370.620464,
+    "min": -24.342836,
+    "p10": 186.73003,
+    "p25": 207.008956,
+    "p50": 229.224883,
+    "p75": 290.722485,
+    "p90": 455.229924,
+    "p95": 662.178526,
+    "p99": 4990.203516,
+    "iqr": 83.713529,
+    "max": 8811.666222
   },
   "usdSummary": {
-    "totalInputUsd": 606930.34538563,
-    "totalOutputUsd": 598236.48292254,
-    "netUsdDelta": 8693.86246309,
-    "weightedShortfallBps": 143.243167,
-    "meanInputUsd": 556.30645773,
-    "medianInputUsd": 10.94285852,
-    "meanOutputUsd": 548.33774787,
-    "medianOutputUsd": 10.74018785,
-    "meanUsdDelta": 7.96870987,
-    "medianUsdDelta": 0.25624207
+    "totalInputUsd": 82054.28838392,
+    "totalOutputUsd": 81021.77854533,
+    "netUsdDelta": 1032.50983859,
+    "weightedShortfallBps": 125.832526,
+    "meanInputUsd": 251.70027112,
+    "medianInputUsd": 7.48459178,
+    "meanOutputUsd": 248.53306302,
+    "medianOutputUsd": 7.30902831,
+    "meanUsdDelta": 3.16720809,
+    "medianUsdDelta": 0.19265602
   },
   "histogramBucketBps": 10,
   "distribution": [
+    {
+      "bucketStartBps": -30,
+      "bucketEndBps": -20,
+      "count": 3
+    },
+    {
+      "bucketStartBps": -20,
+      "bucketEndBps": -10,
+      "count": 1
+    },
+    {
+      "bucketStartBps": -10,
+      "bucketEndBps": 0,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 0,
+      "bucketEndBps": 10,
+      "count": 1
+    },
     {
       "bucketStartBps": 10,
       "bucketEndBps": 20,
       "count": 1
     },
     {
-      "bucketStartBps": 20,
-      "bucketEndBps": 30,
-      "count": 4
-    },
-    {
       "bucketStartBps": 30,
       "bucketEndBps": 40,
-      "count": 6
+      "count": 1
     },
     {
       "bucketStartBps": 40,
       "bucketEndBps": 50,
-      "count": 3
-    },
-    {
-      "bucketStartBps": 50,
-      "bucketEndBps": 60,
-      "count": 6
+      "count": 4
     },
     {
       "bucketStartBps": 60,
       "bucketEndBps": 70,
-      "count": 6
+      "count": 1
     },
     {
       "bucketStartBps": 70,
       "bucketEndBps": 80,
-      "count": 2
-    },
-    {
-      "bucketStartBps": 80,
-      "bucketEndBps": 90,
-      "count": 3
-    },
-    {
-      "bucketStartBps": 90,
-      "bucketEndBps": 100,
-      "count": 2
+      "count": 1
     },
     {
       "bucketStartBps": 100,
       "bucketEndBps": 110,
-      "count": 1
-    },
-    {
-      "bucketStartBps": 110,
-      "bucketEndBps": 120,
-      "count": 10
-    },
-    {
-      "bucketStartBps": 120,
-      "bucketEndBps": 130,
-      "count": 44
+      "count": 7
     },
     {
       "bucketStartBps": 130,
       "bucketEndBps": 140,
-      "count": 49
+      "count": 1
     },
     {
       "bucketStartBps": 140,
       "bucketEndBps": 150,
-      "count": 37
+      "count": 3
     },
     {
       "bucketStartBps": 150,
       "bucketEndBps": 160,
-      "count": 42
+      "count": 1
     },
     {
       "bucketStartBps": 160,
       "bucketEndBps": 170,
-      "count": 25
+      "count": 2
     },
     {
       "bucketStartBps": 170,
       "bucketEndBps": 180,
-      "count": 28
+      "count": 3
     },
     {
       "bucketStartBps": 180,
       "bucketEndBps": 190,
-      "count": 14
+      "count": 7
     },
     {
       "bucketStartBps": 190,
       "bucketEndBps": 200,
-      "count": 14
+      "count": 24
     },
     {
       "bucketStartBps": 200,
       "bucketEndBps": 210,
-      "count": 13
+      "count": 34
     },
     {
       "bucketStartBps": 210,
       "bucketEndBps": 220,
-      "count": 10
+      "count": 40
     },
     {
       "bucketStartBps": 220,
       "bucketEndBps": 230,
-      "count": 14
+      "count": 29
     },
     {
       "bucketStartBps": 230,
       "bucketEndBps": 240,
-      "count": 56
+      "count": 25
     },
     {
       "bucketStartBps": 240,
       "bucketEndBps": 250,
-      "count": 82
+      "count": 19
     },
     {
       "bucketStartBps": 250,
       "bucketEndBps": 260,
-      "count": 87
+      "count": 18
     },
     {
       "bucketStartBps": 260,
       "bucketEndBps": 270,
-      "count": 67
+      "count": 9
     },
     {
       "bucketStartBps": 270,
       "bucketEndBps": 280,
-      "count": 73
+      "count": 5
     },
     {
       "bucketStartBps": 280,
       "bucketEndBps": 290,
-      "count": 53
+      "count": 2
     },
     {
       "bucketStartBps": 290,
       "bucketEndBps": 300,
-      "count": 37
+      "count": 9
     },
     {
       "bucketStartBps": 300,
       "bucketEndBps": 310,
-      "count": 32
+      "count": 7
     },
     {
       "bucketStartBps": 310,
       "bucketEndBps": 320,
-      "count": 26
+      "count": 5
     },
     {
       "bucketStartBps": 320,
       "bucketEndBps": 330,
-      "count": 14
+      "count": 6
     },
     {
       "bucketStartBps": 330,
       "bucketEndBps": 340,
-      "count": 12
+      "count": 3
     },
     {
       "bucketStartBps": 340,
       "bucketEndBps": 350,
-      "count": 14
+      "count": 3
     },
     {
       "bucketStartBps": 350,
       "bucketEndBps": 360,
-      "count": 14
+      "count": 2
     },
     {
       "bucketStartBps": 360,
       "bucketEndBps": 370,
-      "count": 17
+      "count": 3
     },
     {
       "bucketStartBps": 370,
       "bucketEndBps": 380,
-      "count": 10
+      "count": 2
     },
     {
       "bucketStartBps": 380,
       "bucketEndBps": 390,
-      "count": 15
+      "count": 1
     },
     {
       "bucketStartBps": 390,
       "bucketEndBps": 400,
-      "count": 6
+      "count": 3
     },
     {
       "bucketStartBps": 400,
       "bucketEndBps": 410,
-      "count": 10
-    },
-    {
-      "bucketStartBps": 410,
-      "bucketEndBps": 420,
-      "count": 6
+      "count": 1
     },
     {
       "bucketStartBps": 420,
       "bucketEndBps": 430,
-      "count": 6
-    },
-    {
-      "bucketStartBps": 430,
-      "bucketEndBps": 440,
-      "count": 12
+      "count": 3
     },
     {
       "bucketStartBps": 440,
       "bucketEndBps": 450,
-      "count": 11
+      "count": 1
     },
     {
       "bucketStartBps": 450,
       "bucketEndBps": 460,
-      "count": 4
+      "count": 2
     },
     {
       "bucketStartBps": 460,
@@ -307,51 +287,26 @@
     {
       "bucketStartBps": 470,
       "bucketEndBps": 480,
-      "count": 8
-    },
-    {
-      "bucketStartBps": 480,
-      "bucketEndBps": 490,
-      "count": 4
+      "count": 1
     },
     {
       "bucketStartBps": 490,
       "bucketEndBps": 500,
-      "count": 4
-    },
-    {
-      "bucketStartBps": 500,
-      "bucketEndBps": 510,
-      "count": 7
+      "count": 2
     },
     {
       "bucketStartBps": 510,
       "bucketEndBps": 520,
-      "count": 4
-    },
-    {
-      "bucketStartBps": 520,
-      "bucketEndBps": 530,
-      "count": 7
+      "count": 1
     },
     {
       "bucketStartBps": 530,
       "bucketEndBps": 540,
-      "count": 2
-    },
-    {
-      "bucketStartBps": 540,
-      "bucketEndBps": 550,
       "count": 3
     },
     {
       "bucketStartBps": 550,
       "bucketEndBps": 560,
-      "count": 5
-    },
-    {
-      "bucketStartBps": 560,
-      "bucketEndBps": 570,
       "count": 1
     },
     {
@@ -365,39 +320,14 @@
       "count": 1
     },
     {
-      "bucketStartBps": 590,
-      "bucketEndBps": 600,
-      "count": 2
-    },
-    {
-      "bucketStartBps": 600,
-      "bucketEndBps": 610,
-      "count": 2
-    },
-    {
-      "bucketStartBps": 610,
-      "bucketEndBps": 620,
-      "count": 3
-    },
-    {
       "bucketStartBps": 620,
       "bucketEndBps": 630,
-      "count": 3
-    },
-    {
-      "bucketStartBps": 630,
-      "bucketEndBps": 640,
       "count": 1
     },
     {
       "bucketStartBps": 640,
       "bucketEndBps": 650,
       "count": 1
-    },
-    {
-      "bucketStartBps": 650,
-      "bucketEndBps": 660,
-      "count": 2
     },
     {
       "bucketStartBps": 660,
@@ -407,26 +337,16 @@
     {
       "bucketStartBps": 680,
       "bucketEndBps": 690,
-      "count": 4
-    },
-    {
-      "bucketStartBps": 690,
-      "bucketEndBps": 700,
-      "count": 1
+      "count": 2
     },
     {
       "bucketStartBps": 700,
       "bucketEndBps": 710,
-      "count": 2
-    },
-    {
-      "bucketStartBps": 710,
-      "bucketEndBps": 720,
       "count": 1
     },
     {
-      "bucketStartBps": 760,
-      "bucketEndBps": 770,
+      "bucketStartBps": 720,
+      "bucketEndBps": 730,
       "count": 1
     },
     {
@@ -435,48 +355,8 @@
       "count": 1
     },
     {
-      "bucketStartBps": 790,
-      "bucketEndBps": 800,
-      "count": 2
-    },
-    {
-      "bucketStartBps": 800,
-      "bucketEndBps": 810,
-      "count": 1
-    },
-    {
-      "bucketStartBps": 850,
-      "bucketEndBps": 860,
-      "count": 1
-    },
-    {
-      "bucketStartBps": 860,
-      "bucketEndBps": 870,
-      "count": 2
-    },
-    {
-      "bucketStartBps": 920,
-      "bucketEndBps": 930,
-      "count": 1
-    },
-    {
-      "bucketStartBps": 940,
-      "bucketEndBps": 950,
-      "count": 1
-    },
-    {
-      "bucketStartBps": 950,
-      "bucketEndBps": 960,
-      "count": 1
-    },
-    {
-      "bucketStartBps": 960,
-      "bucketEndBps": 970,
-      "count": 1
-    },
-    {
-      "bucketStartBps": 1040,
-      "bucketEndBps": 1050,
+      "bucketStartBps": 890,
+      "bucketEndBps": 900,
       "count": 1
     },
     {
@@ -487,26 +367,46 @@
     {
       "bucketStartBps": 1180,
       "bucketEndBps": 1190,
-      "count": 2
-    },
-    {
-      "bucketStartBps": 1270,
-      "bucketEndBps": 1280,
       "count": 1
     },
     {
-      "bucketStartBps": 1440,
-      "bucketEndBps": 1450,
+      "bucketStartBps": 1350,
+      "bucketEndBps": 1360,
       "count": 1
     },
     {
-      "bucketStartBps": 1460,
-      "bucketEndBps": 1470,
+      "bucketStartBps": 2300,
+      "bucketEndBps": 2310,
       "count": 1
     },
     {
-      "bucketStartBps": 1530,
-      "bucketEndBps": 1540,
+      "bucketStartBps": 3650,
+      "bucketEndBps": 3660,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 4980,
+      "bucketEndBps": 4990,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 4990,
+      "bucketEndBps": 5000,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 5200,
+      "bucketEndBps": 5210,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 6280,
+      "bucketEndBps": 6290,
+      "count": 1
+    },
+    {
+      "bucketStartBps": 8810,
+      "bucketEndBps": 8820,
       "count": 1
     }
   ],

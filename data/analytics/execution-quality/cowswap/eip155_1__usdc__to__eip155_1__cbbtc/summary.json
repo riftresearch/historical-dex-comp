@@ -1,0 +1,278 @@
+{
+  "generatedAt": "2026-03-05T07:19:06.424Z",
+  "provider": "cowswap",
+  "tokenPath": {
+    "sourceChainCanonical": "eip155:1",
+    "sourceTokenSymbol": "USDC",
+    "destinationChainCanonical": "eip155:1",
+    "destinationTokenSymbol": "CBBTC"
+  },
+  "window": {
+    "startAtIso": "2026-02-03T06:54:54.000Z",
+    "endAtIso": "2026-03-05T06:54:54.000Z"
+  },
+  "notionalUsdFilter": {
+    "min": null,
+    "max": null,
+    "minInclusive": false,
+    "maxInclusive": false,
+    "minExclusive": null,
+    "maxExclusive": null,
+    "minInclusiveValue": null,
+    "maxInclusiveValue": null
+  },
+  "signConvention": {
+    "positiveBps": "output USD < input USD (worse for user)",
+    "negativeBps": "output USD > input USD (better for user)"
+  },
+  "totals": {
+    "matchedTrades": 971,
+    "pricedTrades": 971,
+    "skippedInvalidTimestamp": 0,
+    "skippedMissingAmount": 0,
+    "skippedNonPositiveAmount": 0,
+    "skippedMissingPrice": 0,
+    "skippedOutsideNotionalBand": 0,
+    "pricedMatchRatePct": 100
+  },
+  "outcomeSummary": {
+    "betterTrades": 126,
+    "worseTrades": 845,
+    "flatTrades": 0,
+    "betterRatePct": 12.9763,
+    "worseRatePct": 87.0237,
+    "flatRatePct": 0
+  },
+  "bpsSummary": {
+    "count": 971,
+    "mean": -148.108175,
+    "median": 12.63996,
+    "stdDev": 4482.819726,
+    "meanAbs": 259.044606,
+    "min": -98277.173608,
+    "p10": -1.773321,
+    "p25": 4.990173,
+    "p50": 12.63996,
+    "p75": 29.979216,
+    "p90": 62.471105,
+    "p95": 132.134281,
+    "p99": 643.197379,
+    "iqr": 24.989043,
+    "max": 9614.293578
+  },
+  "usdSummary": {
+    "totalInputUsd": 54277513.41211905,
+    "totalOutputUsd": 54188837.73300412,
+    "netUsdDelta": 88675.67911493,
+    "weightedShortfallBps": 16.337462,
+    "meanInputUsd": 55898.57200012,
+    "medianInputUsd": 10000,
+    "meanOutputUsd": 55807.24792276,
+    "medianOutputUsd": 9993.9976138,
+    "meanUsdDelta": 91.32407736,
+    "medianUsdDelta": 6.871904
+  },
+  "histogramBucketBps": 10,
+  "distribution": [
+    {
+      "bucketStartBps": -98280,
+      "bucketEndBps": -98270,
+      "count": 2
+    },
+    {
+      "bucketStartBps": -50,
+      "bucketEndBps": -40,
+      "count": 4
+    },
+    {
+      "bucketStartBps": -30,
+      "bucketEndBps": -20,
+      "count": 6
+    },
+    {
+      "bucketStartBps": -20,
+      "bucketEndBps": -10,
+      "count": 30
+    },
+    {
+      "bucketStartBps": -10,
+      "bucketEndBps": 0,
+      "count": 84
+    },
+    {
+      "bucketStartBps": 0,
+      "bucketEndBps": 10,
+      "count": 289
+    },
+    {
+      "bucketStartBps": 10,
+      "bucketEndBps": 20,
+      "count": 200
+    },
+    {
+      "bucketStartBps": 20,
+      "bucketEndBps": 30,
+      "count": 114
+    },
+    {
+      "bucketStartBps": 30,
+      "bucketEndBps": 40,
+      "count": 84
+    },
+    {
+      "bucketStartBps": 40,
+      "bucketEndBps": 50,
+      "count": 34
+    },
+    {
+      "bucketStartBps": 50,
+      "bucketEndBps": 60,
+      "count": 20
+    },
+    {
+      "bucketStartBps": 60,
+      "bucketEndBps": 70,
+      "count": 14
+    },
+    {
+      "bucketStartBps": 70,
+      "bucketEndBps": 80,
+      "count": 12
+    },
+    {
+      "bucketStartBps": 80,
+      "bucketEndBps": 90,
+      "count": 12
+    },
+    {
+      "bucketStartBps": 90,
+      "bucketEndBps": 100,
+      "count": 6
+    },
+    {
+      "bucketStartBps": 100,
+      "bucketEndBps": 110,
+      "count": 2
+    },
+    {
+      "bucketStartBps": 110,
+      "bucketEndBps": 120,
+      "count": 6
+    },
+    {
+      "bucketStartBps": 120,
+      "bucketEndBps": 130,
+      "count": 2
+    },
+    {
+      "bucketStartBps": 130,
+      "bucketEndBps": 140,
+      "count": 2
+    },
+    {
+      "bucketStartBps": 140,
+      "bucketEndBps": 150,
+      "count": 2
+    },
+    {
+      "bucketStartBps": 150,
+      "bucketEndBps": 160,
+      "count": 4
+    },
+    {
+      "bucketStartBps": 160,
+      "bucketEndBps": 170,
+      "count": 12
+    },
+    {
+      "bucketStartBps": 180,
+      "bucketEndBps": 190,
+      "count": 2
+    },
+    {
+      "bucketStartBps": 190,
+      "bucketEndBps": 200,
+      "count": 4
+    },
+    {
+      "bucketStartBps": 200,
+      "bucketEndBps": 210,
+      "count": 2
+    },
+    {
+      "bucketStartBps": 280,
+      "bucketEndBps": 290,
+      "count": 2
+    },
+    {
+      "bucketStartBps": 310,
+      "bucketEndBps": 320,
+      "count": 2
+    },
+    {
+      "bucketStartBps": 320,
+      "bucketEndBps": 330,
+      "count": 4
+    },
+    {
+      "bucketStartBps": 390,
+      "bucketEndBps": 400,
+      "count": 2
+    },
+    {
+      "bucketStartBps": 550,
+      "bucketEndBps": 560,
+      "count": 2
+    },
+    {
+      "bucketStartBps": 830,
+      "bucketEndBps": 840,
+      "count": 2
+    },
+    {
+      "bucketStartBps": 900,
+      "bucketEndBps": 910,
+      "count": 2
+    },
+    {
+      "bucketStartBps": 1030,
+      "bucketEndBps": 1040,
+      "count": 2
+    },
+    {
+      "bucketStartBps": 1400,
+      "bucketEndBps": 1410,
+      "count": 2
+    },
+    {
+      "bucketStartBps": 9610,
+      "bucketEndBps": 9620,
+      "count": 2
+    }
+  ],
+  "output": {
+    "directory": "/home/alpinevm/Development/rift/historical-dex-comp/data/analytics/execution-quality/cowswap/eip155_1__usdc__to__eip155_1__cbbtc",
+    "tradesCsv": "/home/alpinevm/Development/rift/historical-dex-comp/data/analytics/execution-quality/cowswap/eip155_1__usdc__to__eip155_1__cbbtc/trades.csv",
+    "distributionCsv": "/home/alpinevm/Development/rift/historical-dex-comp/data/analytics/execution-quality/cowswap/eip155_1__usdc__to__eip155_1__cbbtc/distribution.csv",
+    "summaryJson": "/home/alpinevm/Development/rift/historical-dex-comp/data/analytics/execution-quality/cowswap/eip155_1__usdc__to__eip155_1__cbbtc/summary.json"
+  },
+  "pricingSource": {
+    "venue": "coinbase",
+    "endpoint": "GET /products/{product_id}/candles",
+    "granularitySeconds": 60,
+    "priceFieldUsed": "close",
+    "cacheDbPath": "/home/alpinevm/Development/rift/historical-dex-comp/data/analytics/coinbase-price-cache.sqlite",
+    "stablecoinPegMode": "usd_1",
+    "stablecoinUsdPegSymbols": [
+      "DAI",
+      "FRAX",
+      "PYUSD",
+      "USDC",
+      "USDC.E",
+      "USDCE",
+      "USDE",
+      "USDT",
+      "USDT0"
+    ]
+  }
+}
