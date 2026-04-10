@@ -16,6 +16,7 @@ import {
 } from "../storage/repositories/ingest-runs";
 import { openProviderDatabase } from "../storage/provider-db";
 import { applyMigrations } from "../storage/migrations/migration-runner";
+import type { ProviderProgressValue } from "../providers/types";
 
 export interface RunProviderIngestInput {
   providerKey: ProviderKey;
@@ -31,6 +32,43 @@ export interface RunProviderIngestOutput {
   recordsUpserted: number;
   newestEventAt: string | null;
   oldestEventAt: string | null;
+}
+
+const DEFAULT_PROGRESS_HEARTBEAT_SECONDS = 30;
+
+function parseProgressHeartbeatMs(): number {
+  const rawValue = Bun.env.INGEST_PROGRESS_HEARTBEAT_SECONDS ?? process.env.INGEST_PROGRESS_HEARTBEAT_SECONDS;
+  if (!rawValue) {
+    return DEFAULT_PROGRESS_HEARTBEAT_SECONDS * 1_000;
+  }
+
+  const parsed = Number(rawValue);
+  if (!Number.isFinite(parsed) || parsed <= 0) {
+    return DEFAULT_PROGRESS_HEARTBEAT_SECONDS * 1_000;
+  }
+  return Math.max(5, parsed) * 1_000;
+}
+
+function formatProgressValue(value: ProviderProgressValue): string | null {
+  if (value === null || value === undefined) {
+    return null;
+  }
+  const rawValue = String(value);
+  return rawValue.includes(" ") ? JSON.stringify(rawValue) : rawValue;
+}
+
+function formatProgressFields(fields: Record<string, ProviderProgressValue> | undefined): string {
+  if (!fields) {
+    return "";
+  }
+
+  return Object.entries(fields)
+    .map(([key, value]) => {
+      const formattedValue = formatProgressValue(value);
+      return formattedValue === null ? null : `${key}=${formattedValue}`;
+    })
+    .filter((value): value is string => Boolean(value))
+    .join(" | ");
 }
 
 export async function runProviderIngest(
@@ -57,8 +95,42 @@ export async function runProviderIngest(
     fromTs: null,
     toTs: null,
   });
+  const startedAtMs = Date.now();
+  const heartbeatMs = parseProgressHeartbeatMs();
+  let lastProgressMessage = "started";
+  let lastProgressAtMs = startedAtMs;
+  const logProgress = (
+    message: string,
+    fields: Record<string, ProviderProgressValue> | undefined = undefined,
+  ): void => {
+    lastProgressMessage = message;
+    lastProgressAtMs = Date.now();
+    const fieldText = formatProgressFields({
+      runId,
+      mode: input.mode,
+      elapsedSeconds: Math.round((lastProgressAtMs - startedAtMs) / 1000),
+      ...fields,
+    });
+    console.log(`[ingest][${input.providerKey}] ${message}${fieldText ? ` | ${fieldText}` : ""}`);
+  };
+  const heartbeatId = setInterval(() => {
+    const nowMs = Date.now();
+    const fieldText = formatProgressFields({
+      runId,
+      mode: input.mode,
+      elapsedSeconds: Math.round((nowMs - startedAtMs) / 1000),
+      lastProgress: lastProgressMessage,
+      lastProgressAgeSeconds: Math.round((nowMs - lastProgressAtMs) / 1000),
+    });
+    console.log(`[ingest][${input.providerKey}] heartbeat | ${fieldText}`);
+  }, heartbeatMs);
 
   try {
+    logProgress("start", {
+      streamKey: adapter.streamKey,
+      pageSize: tuning.pageSize,
+      maxPages: tuning.maxPages ?? "unlimited",
+    });
     const output = await adapter.ingest({
       connection: db.connection,
       runId,
@@ -67,6 +139,7 @@ export async function runProviderIngest(
       now: new Date(),
       pageSize: tuning.pageSize,
       maxPages: tuning.maxPages,
+      progress: (event) => logProgress(event.message, event.fields),
     });
 
     counts.recordsFetched = output.recordsFetched;
@@ -86,6 +159,13 @@ export async function runProviderIngest(
     }
 
     await finishIngestRunSuccess(db.connection, runId, counts);
+    logProgress("success", {
+      recordsFetched: output.recordsFetched,
+      recordsNormalized: output.recordsNormalized,
+      recordsUpserted: output.recordsUpserted,
+      newestEventAt: nextCheckpoint?.newestEventAt?.toISOString() ?? null,
+      oldestEventAt: nextCheckpoint?.oldestEventAt?.toISOString() ?? null,
+    });
 
     return {
       providerKey: input.providerKey,
@@ -100,8 +180,10 @@ export async function runProviderIngest(
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     await finishIngestRunFailure(db.connection, runId, counts, message);
+    logProgress("failure", { error: message });
     throw error;
   } finally {
+    clearInterval(heartbeatId);
     db.close();
   }
 }

@@ -11,7 +11,7 @@ import { sha256Hex } from "../../utils/hash";
 import { atomicToNormalized, inferTokenDecimals } from "../../utils/amount-normalization";
 import { parseFloatOrNull } from "../../utils/number";
 import { addDays, parseUnixSecondsOrNull, shiftSeconds, toUnixSeconds } from "../../utils/time";
-import type { ProviderAdapter, ProviderIngestInput, ProviderIngestOutput } from "../types";
+import type { ProviderAdapter, ProviderIngestInput, ProviderIngestOutput, ProviderProgressLogger } from "../types";
 import type { LifiToken, LifiTransferRecord, LifiTransfersResponse } from "./types";
 
 const LIFI_BASE_URL = "https://li.quest";
@@ -817,6 +817,7 @@ async function ingestLifi(
   now: Date,
   pageSize: number,
   maxPages: number | null,
+  progress: ProviderProgressLogger | undefined,
 ): Promise<ProviderIngestOutput> {
   const window = applyLifiWindowOverrides(buildLifiWindow(mode, checkpoint, now));
   const routeScopes = resolveLifiRouteScopes();
@@ -831,6 +832,10 @@ async function ingestLifi(
     window.toTimestamp !== null &&
     window.fromTimestamp > window.toTimestamp
   ) {
+    progress?.({
+      message: "lifi_skip_empty_window",
+      fields: { window: formatLifiWindow(window) },
+    });
     return {
       recordsFetched: 0,
       recordsNormalized: 0,
@@ -843,6 +848,15 @@ async function ingestLifi(
     maxPages === null
       ? null
       : Math.max(1, Math.floor(maxPages / routeScopes.length));
+  progress?.({
+    message: "lifi_plan",
+    fields: {
+      scopes: routeScopes.length,
+      window: formatLifiWindow(window),
+      pageSize: effectivePageSize,
+      maxRequestsPerScope: maxRequestsPerScope ?? "unlimited",
+    },
+  });
 
   let recordsFetched = 0;
   let recordsNormalized = 0;
@@ -850,13 +864,34 @@ async function ingestLifi(
   let newestBoundary: BoundaryPoint | null = null;
   let oldestBoundary: BoundaryPoint | null = null;
 
-  for (const scope of routeScopes) {
+  for (const [scopeIndex, scope] of routeScopes.entries()) {
     const queue: LifiWindowChunk[] = [{ window, depth: 0 }];
     const seenWindowKeys = new Set<string>();
     let requestsForScope = 0;
+    let fetchedForScope = 0;
+    let normalizedForScope = 0;
+    let upsertedForScope = 0;
+    progress?.({
+      message: "lifi_scope_start",
+      fields: {
+        scope: scope.key,
+        scopeIndex: scopeIndex + 1,
+        scopes: routeScopes.length,
+        window: formatLifiWindow(window),
+      },
+    });
 
     while (queue.length > 0) {
       if (maxRequestsPerScope !== null && requestsForScope >= maxRequestsPerScope) {
+        progress?.({
+          message: "lifi_scope_request_cap",
+          fields: {
+            scope: scope.key,
+            requestsForScope,
+            maxRequestsPerScope,
+            remainingWindows: queue.length,
+          },
+        });
         break;
       }
 
@@ -879,10 +914,22 @@ async function ingestLifi(
 
       const transfers = page.transfers ?? [];
       recordsFetched += transfers.length;
+      fetchedForScope += transfers.length;
 
       if (transfers.length >= effectivePageSize) {
         const split = splitLifiWindowChunk(chunk);
         if (split) {
+          progress?.({
+            message: "lifi_chunk_split",
+            fields: {
+              scope: scope.key,
+              requestsForScope,
+              depth: chunk.depth,
+              transfers: transfers.length,
+              remainingWindows: queue.length + 2,
+              window: formatLifiWindow(chunk.window),
+            },
+          });
           queue.unshift(split.newer);
           queue.unshift(split.older);
           continue;
@@ -926,6 +973,7 @@ async function ingestLifi(
         coreRows.push(normalized.core);
         rawRows.push(normalized.raw);
         recordsNormalized += 1;
+        normalizedForScope += 1;
 
         if (normalized.eventAt) {
           const point: BoundaryPoint = {
@@ -940,9 +988,48 @@ async function ingestLifi(
       if (coreRows.length > 0) {
         const persisted = await persistSwaps(connection, coreRows, rawRows);
         recordsUpserted += persisted.coreUpserts;
+        upsertedForScope += persisted.coreUpserts;
+      }
+
+      if (requestsForScope === 1 || requestsForScope % 10 === 0 || queue.length === 0) {
+        progress?.({
+          message: "lifi_scope_progress",
+          fields: {
+            scope: scope.key,
+            requestsForScope,
+            remainingWindows: queue.length,
+            fetchedForScope,
+            normalizedForScope,
+            upsertedForScope,
+          },
+        });
       }
     }
+    progress?.({
+      message: "lifi_scope_done",
+      fields: {
+        scope: scope.key,
+        requestsForScope,
+        fetchedForScope,
+        normalizedForScope,
+        upsertedForScope,
+        totalFetched: recordsFetched,
+        totalNormalized: recordsNormalized,
+        totalUpserted: recordsUpserted,
+      },
+    });
   }
+
+  progress?.({
+    message: "lifi_done",
+    fields: {
+      recordsFetched,
+      recordsNormalized,
+      recordsUpserted,
+      newestEventAt: newestBoundary?.eventAt.toISOString() ?? null,
+      oldestEventAt: oldestBoundary?.eventAt.toISOString() ?? null,
+    },
+  });
 
   return {
     recordsFetched,
@@ -965,6 +1052,7 @@ export const lifiProviderAdapter: ProviderAdapter = {
       input.now,
       input.pageSize,
       input.maxPages,
+      input.progress,
     );
   },
 };

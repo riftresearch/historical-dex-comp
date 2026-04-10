@@ -11,6 +11,7 @@ export interface ProviderIngestInput {
   now: Date;
   pageSize: number;
   maxPages: number | null;
+  progress?: ProviderProgressLogger;
 }
 
 export interface ProviderIngestOutput {
@@ -26,3 +27,12 @@ export interface ProviderAdapter {
   sourceEndpoint: string;
   ingest(input: ProviderIngestInput): Promise<ProviderIngestOutput>;
 }
+
+export type ProviderProgressValue = string | number | boolean | null | undefined;
+
+export interface ProviderProgressEvent {
+  message: string;
+  fields?: Record<string, ProviderProgressValue>;
+}
+
+export type ProviderProgressLogger = (event: ProviderProgressEvent) => void;
