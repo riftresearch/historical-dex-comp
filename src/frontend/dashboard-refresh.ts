@@ -119,15 +119,49 @@ async function runCommand(label: string, cmd: string[]): Promise<void> {
 
 async function runSyncNewerForProviders(providers: ProviderKey[]): Promise<void> {
   const bunBinary = Bun.which("bun") ?? "bun";
-  for (const provider of providers) {
-    await runCommand(`sync_newer:${provider}`, [
-      bunBinary,
-      "run",
-      "index.ts",
-      "ingest",
-      provider,
-      "sync_newer",
-    ]);
+  const startedAt = Date.now();
+  console.log(
+    [
+      "[dashboard-refresh] sync_newer_all_start",
+      `providers=${providers.join(",")}`,
+      `concurrency=${providers.length}`,
+    ].join(" | "),
+  );
+
+  const results = await Promise.allSettled(
+    providers.map((provider) =>
+      runCommand(`sync_newer:${provider}`, [
+        bunBinary,
+        "run",
+        "index.ts",
+        "ingest",
+        provider,
+        "sync_newer",
+      ]),
+    ),
+  );
+
+  const failedProviders: string[] = [];
+  for (const [index, result] of results.entries()) {
+    if (result.status === "fulfilled") {
+      continue;
+    }
+    const provider = providers[index] ?? `unknown:${index}`;
+    const message = result.reason instanceof Error ? result.reason.message : String(result.reason);
+    failedProviders.push(`${provider}(${message})`);
+  }
+
+  console.log(
+    [
+      "[dashboard-refresh] sync_newer_all_done",
+      `providers=${providers.join(",")}`,
+      `failed=${failedProviders.length}`,
+      `durationSeconds=${((Date.now() - startedAt) / 1000).toFixed(1)}`,
+    ].join(" | "),
+  );
+
+  if (failedProviders.length > 0) {
+    throw new Error(`sync_newer failed for providers: ${failedProviders.join(", ")}`);
   }
 }
 
