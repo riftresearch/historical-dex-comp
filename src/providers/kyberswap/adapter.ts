@@ -118,6 +118,7 @@ interface KyberswapChainConfig {
   chainId: string;
   chainRaw: string;
   rpcUrl: string;
+  blockRpcUrl: string;
   metaAggregatorAddress: string;
   sourceEndpoint: string;
   sourceTokenMap: Record<string, SourceTokenInfo>;
@@ -950,6 +951,13 @@ function resolveRuntimeConfig(): KyberswapRuntimeConfig {
   if (!mainnetRpcUrl) {
     throw new Error("Missing KYBERSWAP_RPC_URL environment variable.");
   }
+  const mainnetBlockRpcUrl =
+    nonEmptyOrNull(
+      Bun.env.KYBERSWAP_BLOCK_RPC_URL ??
+        process.env.KYBERSWAP_BLOCK_RPC_URL ??
+        Bun.env.BLOCK_RPC_URL ??
+        process.env.BLOCK_RPC_URL,
+    ) ?? mainnetRpcUrl;
 
   const baseRpcUrl =
     nonEmptyOrNull(
@@ -958,6 +966,13 @@ function resolveRuntimeConfig(): KyberswapRuntimeConfig {
         Bun.env.BASE_RPC_URL ??
         process.env.BASE_RPC_URL,
     ) ?? DEFAULT_BASE_RPC_URL;
+  const baseBlockRpcUrl =
+    nonEmptyOrNull(
+      Bun.env.KYBERSWAP_BASE_BLOCK_RPC_URL ??
+        process.env.KYBERSWAP_BASE_BLOCK_RPC_URL ??
+        Bun.env.BASE_BLOCK_RPC_URL ??
+        process.env.BASE_BLOCK_RPC_URL,
+    ) ?? baseRpcUrl;
 
   const configuredMainnetMetaAggregator = nonEmptyOrNull(
     Bun.env.KYBERSWAP_META_AGGREGATOR ?? process.env.KYBERSWAP_META_AGGREGATOR,
@@ -986,6 +1001,7 @@ function resolveRuntimeConfig(): KyberswapRuntimeConfig {
         chainId: CHAIN_ID_MAINNET,
         chainRaw: CHAIN_RAW_MAINNET,
         rpcUrl: mainnetRpcUrl,
+        blockRpcUrl: mainnetBlockRpcUrl,
         metaAggregatorAddress: mainnetMetaAggregatorAddress,
         sourceEndpoint: `${KYBERSWAP_SOURCE_ENDPOINT}:${CHAIN_CANONICAL_MAINNET}`,
         sourceTokenMap: buildSourceTokenMap({
@@ -1006,6 +1022,7 @@ function resolveRuntimeConfig(): KyberswapRuntimeConfig {
         chainId: CHAIN_ID_BASE,
         chainRaw: CHAIN_RAW_BASE,
         rpcUrl: baseRpcUrl,
+        blockRpcUrl: baseBlockRpcUrl,
         metaAggregatorAddress: baseMetaAggregatorAddress,
         sourceEndpoint: `${KYBERSWAP_SOURCE_ENDPOINT}:${CHAIN_CANONICAL_BASE}`,
         sourceTokenMap: buildSourceTokenMap({
@@ -1034,7 +1051,7 @@ async function buildKyberswapWindow(
   newestCursor: CursorPosition | null,
   oldestCursor: CursorPosition | null,
 ): Promise<KyberswapWindow> {
-  const latestBlockNumber = await getLatestBlockNumber(chain.rpcUrl);
+  const latestBlockNumber = await getLatestBlockNumber(chain.blockRpcUrl);
 
   if (mode === "sync_newer") {
     if (newestCursor) {
@@ -1050,7 +1067,7 @@ async function buildKyberswapWindow(
       ? new Date(checkpoint.newestEventAt.getTime() + 1_000)
       : addDays(now, -KYBERSWAP_WINDOW_DAYS);
     const fromBlock = await findFirstBlockAtOrAfterTimestamp(
-      chain.rpcUrl,
+      chain.blockRpcUrl,
       toUnixSeconds(fallbackFrom),
       latestBlockNumber,
       blockTimestampCache,
@@ -1066,14 +1083,14 @@ async function buildKyberswapWindow(
   if (mode === "backfill_older") {
     if (oldestCursor) {
       const anchorTimestampSeconds = toUnixSeconds(
-        await getBlockTimestamp(chain.rpcUrl, oldestCursor.blockNumber, blockTimestampCache),
+        await getBlockTimestamp(chain.blockRpcUrl, oldestCursor.blockNumber, blockTimestampCache),
       );
       const fromTimestampSeconds = Math.max(
         0,
         anchorTimestampSeconds - KYBERSWAP_WINDOW_DAYS * 24 * 60 * 60,
       );
       const fromBlock = await findFirstBlockAtOrAfterTimestamp(
-        chain.rpcUrl,
+        chain.blockRpcUrl,
         fromTimestampSeconds,
         latestBlockNumber,
         blockTimestampCache,
@@ -1089,7 +1106,7 @@ async function buildKyberswapWindow(
 
   const bootstrapFrom = addDays(now, -KYBERSWAP_WINDOW_DAYS);
   const fromBlock = await findFirstBlockAtOrAfterTimestamp(
-    chain.rpcUrl,
+    chain.blockRpcUrl,
     toUnixSeconds(bootstrapFrom),
     latestBlockNumber,
     blockTimestampCache,
@@ -1286,7 +1303,7 @@ async function ingestKyberswap(
       }
 
       await warmBlockTimestamps(
-        chain.rpcUrl,
+        chain.blockRpcUrl,
         matchedEntries.map((entry) => entry.position.blockNumber),
         blockTimestampCache,
       );
@@ -1297,7 +1314,11 @@ async function ingestKyberswap(
         const providerRecordId = `${chain.chainCanonical}:${txHash}:${entry.position.logIndex}`;
         const eventAt =
           blockTimestampCache.get(entry.position.blockNumber) ??
-          (await getBlockTimestamp(chain.rpcUrl, entry.position.blockNumber, blockTimestampCache));
+          (await getBlockTimestamp(
+            chain.blockRpcUrl,
+            entry.position.blockNumber,
+            blockTimestampCache,
+          ));
         const rawJson = JSON.stringify(entry.log);
         const rawHash = sha256Hex(rawJson);
 
