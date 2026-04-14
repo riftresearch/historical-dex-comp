@@ -18,7 +18,7 @@ const PROVIDER_INGEST_TUNING: Record<ProviderKey, ProviderIngestTuning> = {
     sleepSeconds: 5,
   },
   thorchain: {
-    pageSize: 200,
+    pageSize: 50,
     maxPages: 200,
     sleepSeconds: 5,
   },

@@ -24,7 +24,7 @@ const THORCHAIN_SOURCE_ENDPOINT = `${THORCHAIN_BASE_URL}/v2/actions?type=swap&as
 const THORCHAIN_STREAM_KEY = "swaps:actions:v2";
 const THORCHAIN_WINDOW_DAYS = 30;
 const THORCHAIN_PAGE_SIZE_DEFAULT = 50;
-const THORCHAIN_PAGE_SIZE_MAX = 200;
+const THORCHAIN_PAGE_SIZE_MAX = 50;
 
 interface ThorchainWindow {
   fromTs: Date | null;
